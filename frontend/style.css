@@ -1,0 +1,283 @@
+/* ---- GLOBAL STYLES ---- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+@font-face {
+    font-family: "Source Sans 3";
+    src:
+        local("Source Sans 3"),
+        url("./fonts/SourceSans3-VariableFont_wght.ttf"),
+        url("./fonts/static/SourceSans3-Regular.ttf");
+    font-optical-sizing: auto;
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --border: 0.4rem solid red;
+    --font-lg: 4rem;
+    --font-md: 2rem;
+    --space-size: 0.4rem;
+}
+
+button, textarea {
+    background-color: inherit;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    border: 0;
+}
+
+button {
+    cursor: pointer;
+}
+
+/* ---- SPECIFIC STYLES ---- */
+body {
+    background-color: black;
+    color: white;
+
+    font-family: "Source Sans 3", sans-serif;
+    font-size: var(--font-lg);
+
+    border: var(--border);
+
+    margin: 0 auto;
+    max-width: 55rem;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+hr {
+    border: var(--border);
+    border-bottom: 0;
+    margin: 0;
+}
+
+header {
+    text-align: center;
+}
+
+header nav {
+    display: grid;
+    grid-template-columns: 1fr var(--space-size) 1fr var(--space-size) 1fr;
+}
+
+header nav button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+header nav button.active {
+    background-color: rgb(255, 255, 255, 25%);
+}
+
+header nav hr {
+    border-right: 0;
+}
+
+.icon {
+    width: var(--font-lg);
+    margin: var(--space-size);
+}
+
+main {
+    height: 100%;
+}
+
+main > div {
+    height: 100%;
+
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+
+.list, .settings {
+    padding: var(--space-size);
+}
+
+main > div.active {
+    display: flex;
+}
+
+.home hr {
+    width: 100%;
+}
+
+#youtube-links {
+    height: 100%;
+    width: 100%;
+
+    font-size: var(--font-md);
+
+    outline: none;
+    resize: none;
+
+    padding: var(--space-size);
+}
+
+.list, .settings {
+    font-size: var(--font-md);
+}
+
+.list ol {
+    margin: 0;
+    width: 100%;
+}
+
+.card {
+    width: 100%;
+}
+
+.settings {
+    margin: 0 auto;
+    max-width: 40rem;
+}
+
+.settings > ul {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+}
+
+.setting {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin: var(--space-size);
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+}
+
+.progress-container hr {
+    border: solid white;
+    height: 1rem;
+}
+
+.progress-bar {
+    display: flex;
+    width: 100%;
+}
+
+.progress {
+    height: 1rem;
+    background-color: red;
+}
+
+.progress-container span {
+    margin: 0 1rem;
+    width: 12rem;
+
+    text-align: right;
+}
+
+/*
+    Custom dropdown menu tailored to current UI.
+    Reference: https://blog.logrocket.com/creating-custom-select-dropdown-css/#creating-custom-select-dropdown-scratch-css-javascript
+*/
+.dropdown-container {
+    position: relative;
+}
+
+.select-button {
+    border: var(--border);
+    border-width: 0.2rem;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0.2rem 0.4rem;
+
+    cursor: pointer;
+}
+
+.arrow {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid white;
+    margin: var(--space-size);
+}
+
+.dropdown-list {
+    position: absolute;
+    top: 100%;
+    margin-top: 10px;
+
+    border: var(--border);
+    border-width: 0.2rem;
+
+    list-style-type: none;
+    padding: 0;
+
+    background-color: black;
+    z-index: 99;
+}
+
+.dropdown-list li {
+    padding: 0.2rem 0.4rem;
+    cursor: pointer;
+}
+
+.dropdown-list .selected {
+    background-color: rgb(255, 255, 255, 50%);
+}
+
+.dropdown-list li:not(.selected):hover {
+    background-color: rgb(255, 255, 255, 25%);
+}
+
+.hidden {
+    display: none;
+}
+
+/*
+    Custom checkbox tailored to current UI.
+    Reference: https://www.w3schools.com/howto/howto_css_custom_checkbox.asp
+*/
+.checkbox-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 100%;
+}
+
+.checkbox {
+    border: var(--border);
+    border-width: 0.2rem;
+
+    width: 2.5rem;
+    height: 2.5rem;
+
+    padding: var(--space-size);
+
+    position: relative;
+}
+
+.checkbox::after {
+    position: absolute;
+    content: "";
+    left: 12px;
+    top: 6px;
+    width: 9px;
+    height: 18px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+
+    display: none;
+}
+
+.checkbox-container input:checked ~ .checkbox::after {
+    display: block;
+}

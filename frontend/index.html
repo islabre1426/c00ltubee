@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>c00ltubee</title>
+</head>
+<body>
+    <header>
+        <span>c00ltubee</span>
+
+        <hr>
+
+        <nav>
+            <button class="active" type="button" data-nav="home">
+                <img class="icon" src="./icons/home.svg" alt="Home icon">
+            </button>
+
+            <hr>
+
+            <button type="button" data-nav="list">
+                <img class="icon" src="./icons/list.svg" alt="List icon">
+            </button>
+
+            <hr>
+
+            <button type="button" data-nav="settings">
+                <img class="icon" src="./icons/gear.svg" alt="Settings icon">
+            </button>
+        </nav>
+    </header>
+
+    <hr>
+
+    <main>
+        <div class="home active" data-nav="home">
+            <label for="youtube-links">Youtube links</label>
+
+            <hr>
+
+            <textarea name="youtube-links" id="youtube-links" placeholder="Input links..."></textarea>
+
+            <hr>
+
+            <button type="submit">Inject!!</button>
+        </div>
+
+        <div class="list" data-nav="list"></div>
+
+        <div class="settings" data-nav="settings"></div>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
