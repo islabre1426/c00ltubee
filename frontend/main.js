@@ -1,27 +1,27 @@
 const navButtons = document.querySelectorAll('header nav button');
 const navContents = document.querySelectorAll('main > div');
 const list = document.querySelector('.list');
-const settings = document.querySelector('.settings');
+const settingsEl = document.querySelector('.settings');
+
+const backend = initBackend();
+
+const settings = await backend.loadSetting();
+
+// UI handling
+if (settings.has_user_config) {
+    createAllSettings(settingsEl, settings.result[0], settings.result[1]);
+} else {
+    createAllSettings(settingsEl, settings.result[0]);
+}
 
 handleDropdown();
+handleCheckbox();
 
 navButtons.forEach((button) => {
     button.addEventListener('click', () => navigateContent(button));
 });
 
-createAllSettings(settings, {
-    default_video_format: {
-        title: 'Default video format',
-        type: 'dropdown',
-        default: 'mp4',
-        options: ['mp4', 'webm'],
-    },
-    audio_only: {
-        title: 'Audio only',
-        type: 'checkbox',
-        default: false,
-    },
-})
+
 
 function navigateContent(button) {
     const navData = button.dataset.nav;
@@ -105,7 +105,10 @@ function createAllSettings(parent, globalConfig, userConfig = null) {
     Object.keys(globalConfig).forEach((config) => {
         const li = document.createElement('li');
 
-        createSetting(li, config, globalConfig[config], userConfig);
+        createSetting(
+            li, config, globalConfig[config],
+            userConfig !== null ? userConfig[config] : null,
+        );
 
         ul.append(li);
     });
@@ -178,52 +181,56 @@ function createDropdown(parent, name, title, options, defaultConfig, userConfig 
     Reference: https://blog.logrocket.com/creating-custom-select-dropdown-css/#creating-custom-select-dropdown-scratch-css-javascript
 */
 function handleDropdown() {
-    document.addEventListener('DOMContentLoaded', () => {
-        const containers = document.querySelectorAll('.dropdown-container');
-    
-        containers.forEach((ctn) => {
-            const selectButton = ctn.querySelector('.select-button');
-            const dropdown = ctn.querySelector('.dropdown-list');
-            const options = dropdown.querySelectorAll('li');
-            const selectedValue = selectButton.querySelector('.selected-value');
-    
-            const toggleDropdown = (expand = null) => {
-                const isOpen = expand !== null ? expand : dropdown.classList.contains('hidden');
-                dropdown.classList.toggle('hidden', !isOpen);
-            };
-    
-            const handleOptionSelect = (option) => {
-                options.forEach((opt) => opt.classList.remove('selected'));
-                option.classList.add('selected');
-                selectedValue.textContent = option.textContent.trim();
-            };
-    
-            // Handle option selection
-            options.forEach((option) => {
-                option.addEventListener('click', () => {
-                    handleOptionSelect(option);
-                    toggleDropdown(false);
-                });
-            });
-    
-            // Handle dropdown toggling
-            selectButton.addEventListener('click', () => toggleDropdown());
-    
-            // Handle outside click
-            document.addEventListener('click', (e) => {
-                const isOutsideClick = !ctn.contains(e.target);
-    
-                if (isOutsideClick) {
-                    toggleDropdown(false);
-                }
+    const containers = document.querySelectorAll('.dropdown-container');
+
+    containers.forEach((ctn) => {
+        const setting = ctn.dataset.setting;
+        const selectButton = ctn.querySelector('.select-button');
+        const dropdown = ctn.querySelector('.dropdown-list');
+        const options = dropdown.querySelectorAll('li');
+        const selectedValue = selectButton.querySelector('.selected-value');
+
+        const toggleDropdown = (expand = null) => {
+            const isOpen = expand !== null ? expand : dropdown.classList.contains('hidden');
+            dropdown.classList.toggle('hidden', !isOpen);
+        };
+
+        const handleOptionSelect = async (option) => {
+            const optionContent = option.textContent.trim();
+
+            options.forEach((opt) => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            selectedValue.textContent = optionContent;
+
+            await backend.saveSetting({ [setting]: optionContent });
+        };
+
+        // Handle option selection
+        options.forEach((option) => {
+            option.addEventListener('click', async () => {
+                await handleOptionSelect(option);
+                toggleDropdown(false);
             });
         });
-    })
+
+        // Handle dropdown toggling
+        selectButton.addEventListener('click', () => toggleDropdown());
+
+        // Handle outside click
+        document.addEventListener('click', (e) => {
+            const isOutsideClick = !ctn.contains(e.target);
+
+            if (isOutsideClick) {
+                toggleDropdown(false);
+            }
+        });
+    });
 }
 
 function createCheckbox(parent, name, title, defaultConfig, userConfig = null) {
     const container = document.createElement('label');
     container.classList.add('checkbox-container');
+    container.dataset.setting = name;
 
     const titleEl = document.createElement('span');
     titleEl.textContent = title;
@@ -240,4 +247,42 @@ function createCheckbox(parent, name, title, defaultConfig, userConfig = null) {
 
     container.append(titleEl, input, checkbox);
     parent.append(container);
+}
+
+function handleCheckbox() {
+    const containers = document.querySelectorAll('.checkbox-container');
+
+    containers.forEach((ctn) => {
+        const setting = ctn.dataset.setting;
+        const input = ctn.querySelector('input');
+
+        input.addEventListener('change', async () => {
+            await backend.saveSetting({ [setting]: input.checked });
+        });
+    });
+}
+
+function initBackend() {
+    return {
+        loadSetting: async () => await fetchJson('/load-settings', 'GET'),
+        saveSetting: async (setting) => await fetchJson('/save-setting', 'POST', setting),
+    };
+}
+
+async function fetchJson(url, method, body = null) {
+    const resp = await fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: body !== null ? JSON.stringify(body) : null,
+    });
+
+    if (!resp.ok) {
+        throw new Error(`Fetching from ${url} failed: Server returned status ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    console.log(data);
+    return data;
 }
