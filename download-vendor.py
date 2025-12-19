@@ -1,239 +1,274 @@
 '''
-A script for downloading vendor dependencies for development purpose.
+Vendor dependency downloader for development use.
 '''
-# Reference:
-# - https://stackoverflow.com/a/37573701
-# - https://scribe.rip/@armaansinghbhau8/automate-file-downloads-from-urls-with-python-a-simple-guide-9a98cde10095
-# - https://scribe.rip/@i.doganos/extracting-and-renaming-files-from-zip-archives-in-python-3c015ec21280
 
-from tqdm import tqdm
-import requests
+from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterable
+
 import hashlib
+import requests
 import shutil
 import tarfile, zipfile
+import sys
+
+from tqdm import tqdm
+
+# -------------
+# Configuration
+# -------------
 
 VENDOR_DIR = Path('vendor')
 
-# FFMPEG source is tag-based, and has seperate checksum file
-FFMPEG = {
-    'source': 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/',
-    'checksum': 'checksums.sha256',
-    'archive': {
-        'linux': 'ffmpeg-n8.0-latest-linux64-gpl-8.0.tar.xz',
-        'windows': 'ffmpeg-n8.0-latest-win64-gpl-8.0.zip',
-    },
-}
+BLOCK_SIZE = 1024 * 1024    # 1MB
 
-# Deno is release-based (no tag), and its checksum file is the archive name + '.sha256sum'
-DENO = {
-    'source': 'https://github.com/denoland/deno/releases/latest/download/',
-    'archive': {
-        'linux': 'deno-x86_64-unknown-linux-gnu.zip',
-        'windows': 'deno-x86_64-pc-windows-msvc.zip'
-    },
-    'ext': {
-        'linux': 'deno',
-        'windows': 'deno.exe'
-    }
-}
 
-def download_file(url: str, save_path: Path) -> bool:
-    try:
-        response = requests.get(url, stream = True)
+@dataclass(frozen = True)
+class VendorArchive:
+    platform: str
+    filename: str
+    extracted_name: str | None = None   # None = extract as-is
 
-        if response.status_code == 200:
-            total_size = int(response.headers.get('Content-Length', 0))
-            block_size = 1024
 
-            with tqdm(total = total_size, unit = 'B', unit_scale = True) as progress_bar:
-                with open(save_path, 'wb') as file:
-                    for data in response.iter_content(block_size):
-                        progress_bar.update(len(data))
-                        file.write(data)
-            
-            if total_size != 0 and progress_bar.n != total_size:
-                raise RuntimeError(f'Could not download file {save_path}')
-            
-            return True
-        else:
-            print(f"Failed to download file {save_path}. Status code: {response.status_code}")
-            return False
-    except Exception as e:
-        print(f"Error: {e}")
+@dataclass(frozen = True)
+class VendorSpec:
+    name: str
+    source_url: str
+    archives: list[VendorArchive]
+    checksum_file: str | None
+    checksum_suffix: str | None = None  # for per-archive checksum files
+
+
+FFMPEG = VendorSpec(
+    name = 'ffmpeg',
+    source_url = 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/',
+    checksum_file = 'checksums.sha256',
+    archives = [
+        VendorArchive(
+            platform = 'linux',
+            filename = 'ffmpeg-n8.0-latest-linux64-gpl-8.0.tar.xz',
+            extracted_name = 'linux',
+        ),
+        VendorArchive(
+            platform = 'windows',
+            filename = 'ffmpeg-n8.0-latest-win64-gpl-8.0.zip',
+            extracted_name = 'windows',
+        )
+    ]
+)
+
+
+DENO = VendorSpec(
+    name = 'deno',
+    source_url = 'https://github.com/denoland/deno/releases/latest/download/',
+    checksum_file = None,
+    checksum_suffix = '.sha256sum',
+    archives = [
+        VendorArchive(
+            platform = 'linux',
+            filename = 'deno-x86_64-unknown-linux-gnu.zip',
+            extracted_name = 'deno',
+        ),
+        VendorArchive(
+            platform = 'windows',
+            filename = 'deno-x86_64-pc-windows-msvc.zip',
+            extracted_name = 'deno.exe'
+        )
+    ]
+)
+
+# ----------
+# Networking
+# ----------
+
+def download_file(
+    session: requests.Session,
+    url: str,
+    dest: Path,
+) -> None:
+    if dest.exists():
+        return
+    
+    with session.get(url, stream = True, timeout = 30) as r:
+        r.raise_for_status()
+        total = int(r.headers.get('Content-Length', 0))
+
+        with dest.open('wb') as f, tqdm(
+            total = total,
+            unit = 'B',
+            unit_scale = True,
+            desc = dest.name,
+        ) as progress_bar:
+            for chunk in r.iter_content(BLOCK_SIZE):
+                if chunk:
+                    f.write(chunk)
+                    progress_bar.update(len(chunk))
         
+        if total and progress_bar.n != total:
+            raise RuntimeError(f'Incomplete download: {dest}')
 
-def download_files_list(urls: list[str], save_folder: Path):
+
+def download_many(
+    session: requests.Session,
+    urls: Iterable[str],
+    target_dir: Path
+) -> None:
     for url in urls:
-        try:
-            filename = url.split('/')[-1]
-            save_path = Path(save_folder, filename)
+        dest = target_dir / url.split('/')[-1]
+        download_file(session, url, dest)
 
-            if save_path.exists():
-                print(f'WARNING: File {filename} already exists in {save_path}. Skipping.')
-                continue
+# --------
+# Checksum
+# --------
 
-            print(f'Downloading {filename} to {save_path}...')
-            success = download_file(url, save_path)
-            
-            if success:
-                print('Download completed')
-            print()
-
-        except Exception as e:
-            print(f'Failed to download {url}: {e}')
+def sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open('rb') as f:
+        for chunk in iter(lambda: f.read(8192), b''):
+            h.update(chunk)
+    return h.hexdigest()
 
 
-def calculate_checksum(filename: Path) -> str:
-    with filename.open('rb') as f:
-        file_hash = hashlib.sha256()
-
-        while chunk := f.read(8192):
-            file_hash.update(chunk)
-
-    return file_hash.hexdigest()
-
-
-def check_file_integrity(filename: Path, checksum_file: Path) -> bool:
-    file_hash = calculate_checksum(filename)
+def verify_checksum(artifact: Path, checksum_file: Path) -> None:
+    digest = sha256(artifact)
 
     with checksum_file.open() as f:
-        checksum_content = f.readlines()
+        for line in f:
+            # Checksum format can be different for Windows and Linux
+            # Hence it's suitable to perform substring matches for checking
+            if digest.lower() in line.lower():
+                return
+    
+    raise RuntimeError(f'Checksum verification failed: {artifact.name}')
 
-    for line in checksum_content:
-        if file_hash in line or file_hash.upper() in line:
-            print(f'{filename} integrity verified')
-            return True
+# ----------
+# Extraction
+# ----------
+
+def extract_archive(
+    archive: Path,
+    extract_target: Path,
+    overwrite: bool = True,
+) -> None:
+    if extract_target.exists():
+        if overwrite:
+            if extract_target.is_dir():
+                shutil.rmtree(extract_target)
+            elif extract_target.is_file():
+                extract_target.unlink(missing_ok = True)
+            else:
+                raise RuntimeError(f'Invalid destination type for {extract_target}')
+        else:
+            return
+    
+    if archive.suffix == '.zip':
+        with zipfile.ZipFile(archive) as z:
+            # Prevent silent corruption on root layout change
+            roots = {p.split('/')[0] for p in z.namelist()}
+
+            if len(roots) != 1:
+                raise RuntimeError(f'Archive has multiple roots: {archive}')
+
+            root = roots.pop()
+            z.extractall(archive.parent)
+    elif archive.suffixes[-2:] == ['.tar', '.xz']:
+        with tarfile.open(archive, 'r:xz') as t:
+            # Similar to above
+            roots = {p.split('/')[0] for p in t.getnames()}
+
+            if len(roots) != 1:
+                raise RuntimeError(f'Archive has multiple roots: {archive}')
+
+            root = roots.pop()
+            t.extractall(archive.parent)
+    else:
+        raise ValueError(f'Unsupported archive: {archive}')
+    
+    (archive.parent / root).rename(extract_target)
+
+
+# ---------
+# Utilities
+# ---------
+
+def detect_platform() -> str:
+    if sys.platform.startswith('win'):
+        return 'windows'
+    elif sys.platform.startswith('linux'):
+        return 'linux'
+    raise RuntimeError(f'Unsupported platform: {sys.platform}')
+
+# -----------------
+# Vendor processing
+# -----------------
+
+def process_vendor(spec: VendorSpec, overwrite: bool = True) -> None:
+    vendor_dir = VENDOR_DIR / spec.name
+    vendor_dir.mkdir(parents = True, exist_ok = True)
+
+    platform = detect_platform()
+
+    archives = [a for a in spec.archives if a.platform == platform]
+
+    if not archives:
+        raise RuntimeError(f'No archives defined for vendor "{spec.name}" on platform "{platform}"')
+
+    # Download vendor
+    with requests.Session() as session:
+        download_urls = []
+
+        if spec.checksum_file:
+            download_urls.append(spec.source_url + spec.checksum_file)
         
-    print(f'WARNING: {filename} expected hash not found in {checksum_file}')
-    return False
-
-
-def download_ffmpeg(save_folder: Path):
-    ffmpeg_urls = [
-        FFMPEG['source'] + FFMPEG['checksum'],
-    ]
-
-    for archive in FFMPEG['archive']:
-        ffmpeg_urls.append(FFMPEG['source'] + FFMPEG['archive'][archive])
-
-    download_files_list(ffmpeg_urls, save_folder)
-
-def extract_ffmpeg(folder_contain, overwrite = True):
-    for archive in FFMPEG['archive']:
-        archive_path = Path(folder_contain, FFMPEG['archive'][archive])
-
-        if archive_path.exists():
-            dest_dir = Path(folder_contain, archive)
-
-            if dest_dir.exists():
-                if not overwrite:
-                    print(f'WARNING: {archive} already exists in {folder_contain}. Pass --overwrite to force renaming.')
-                    print('Skipping.')
-                    continue
-                else:
-                    shutil.rmtree(dest_dir)
-
-            print(f'Extracting {archive_path}...')
-
-            if str(archive_path).endswith('.tar.xz'):
-                with tarfile.open(archive_path, 'r:xz') as f:
-                    archive_parent_folder = f.getnames()[0]
-                    f.extractall(folder_contain)
-
-            elif str(archive_path).endswith('.zip'):
-                with zipfile.ZipFile(archive_path) as f:
-                    archive_parent_folder = f.namelist()[0]
-                    f.extractall(folder_contain)
-
-            print(f'Renaming {archive_parent_folder} to {archive}...')
-            Path(folder_contain, archive_parent_folder).rename(dest_dir)
-
-            print('Done')
-            print('Extraction completed')
-        else:
-            print(f'Error: Archive does not exist: {archive_path}')
-
-def clean_up_ffmpeg(folder_contain):
-    print('Cleaning up downloaded ffmpeg files...')
-
-    Path(folder_contain, FFMPEG['checksum']).unlink()
-
-    for archive in FFMPEG['archive']:
-        Path(folder_contain, FFMPEG['archive'][archive]).unlink()
+        for a in archives:
+            download_urls.append(spec.source_url + a.filename)
+            if spec.checksum_suffix:
+                download_urls.append(spec.source_url + a.filename + spec.checksum_suffix)
+        
+        download_many(session, download_urls, vendor_dir)
     
-    print('Cleanup completed')
+    # Integrity checks
+    for a in archives:
+        archive_path = vendor_dir / a.filename
 
-def download_deno(save_folder: Path):        
-    deno_urls = []
-
-    for archive in DENO['archive']:
-        deno_urls.append(DENO['source'] + DENO['archive'][archive])
-        deno_urls.append(DENO['source'] + DENO['archive'][archive] + '.sha256sum')
-
-    download_files_list(deno_urls, save_folder)
-
-def extract_deno(folder_contain, overwrite = True):
-    for archive in DENO['archive']:
-        archive_path = Path(folder_contain, DENO['archive'][archive])
-
-        if archive_path.exists():
-            dest = Path(folder_contain, DENO['ext'][archive])
-
-            if dest.exists():
-                if not overwrite:
-                    print(f'WARNING: {dest} already exists in {folder_contain}. Pass --overwrite to force renaming.')
-                    print('Skipping.')
-                    continue
-                else:
-                    dest.unlink()
-
-            print(f'Extracting {archive_path}...')
-
-            shutil.unpack_archive(archive_path, folder_contain)
-
-            print('Extraction completed')
-        else:
-            print(f'Error: Archive does not exist: {archive_path}')
-
-def clean_up_deno(folder_contain):
-    print('Cleaning up downloaded deno files...')
-
-    for archive in DENO['archive']:
-        Path(folder_contain, DENO['archive'][archive]).unlink()
-        Path(folder_contain, DENO['archive'][archive] + '.sha256sum').unlink()
+        if spec.checksum_file:
+            verify_checksum(
+                archive_path,
+                vendor_dir / spec.checksum_file
+            )
+        elif spec.checksum_suffix:
+            verify_checksum(
+                archive_path,
+                vendor_dir / (a.filename + spec.checksum_suffix),
+            )
     
-    print('Cleanup completed')
-
-def main():
-    ffmpeg_save_folder = Path(VENDOR_DIR, 'ffmpeg')
-    deno_save_folder = Path(VENDOR_DIR, 'deno')
-
-    ffmpeg_save_folder.mkdir(parents = True, exist_ok = True)
-    deno_save_folder.mkdir(parents = True, exist_ok = True)
-
-    download_ffmpeg(ffmpeg_save_folder)
-
-    for archive in FFMPEG['archive']:
-        check_file_integrity(
-            Path(ffmpeg_save_folder, FFMPEG['archive'][archive]),
-            Path(ffmpeg_save_folder, FFMPEG['checksum']),
+    # Extraction
+    for a in archives:
+        extract_archive(
+            vendor_dir / a.filename,
+            vendor_dir / a.extracted_name,
+            overwrite = overwrite
         )
     
-    extract_ffmpeg(ffmpeg_save_folder)
-    clean_up_ffmpeg(ffmpeg_save_folder)
-
-    download_deno(deno_save_folder)
-
-    for archive in DENO['archive']:
-        check_file_integrity(
-            Path(deno_save_folder, DENO['archive'][archive]),
-            Path(deno_save_folder, DENO['archive'][archive] + '.sha256sum'),
-        )
+    # Cleanup
+    for a in archives:
+        (vendor_dir / a.filename).unlink(missing_ok = True)
+        if spec.checksum_suffix:
+            (vendor_dir / (a.filename + spec.checksum_suffix)).unlink(missing_ok = True)
     
-    extract_deno(deno_save_folder)
-    clean_up_deno(deno_save_folder)
+    if spec.checksum_file:
+        (vendor_dir / spec.checksum_file).unlink(missing_ok = True)
+
+# -----------
+# Entry point
+# -----------
+
+def main() -> None:
+    process_vendor(FFMPEG)
+    process_vendor(DENO)
+
 
 if __name__ == '__main__':
     main()
