@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
+import argparse
 import hashlib
 import requests
 import shutil
@@ -78,6 +79,11 @@ DENO = VendorSpec(
         )
     ]
 )
+
+VENDORS = {
+    'ffmpeg': FFMPEG,
+    'deno': DENO,
+}
 
 # ----------
 # Networking
@@ -200,20 +206,35 @@ def detect_platform() -> str:
         return 'linux'
     raise RuntimeError(f'Unsupported platform: {sys.platform}')
 
+
 # -----------------
 # Vendor processing
 # -----------------
 
-def process_vendor(spec: VendorSpec, overwrite: bool = True) -> None:
+def process_vendor(
+    spec: VendorSpec,
+    *,
+    overwrite: bool,
+    platforms: Iterable[str | None] | None = None,
+) -> None:
     vendor_dir = VENDOR_DIR / spec.name
     vendor_dir.mkdir(parents = True, exist_ok = True)
 
-    platform = detect_platform()
+    if not platforms:
+        platforms = [detect_platform()]
+    else:
+        platforms = [
+            p if p is not None else detect_platform()
+            for p in platforms
+        ]
 
-    archives = [a for a in spec.archives if a.platform == platform]
+    archives = [
+        a for a in spec.archives
+        if a.platform in platforms
+    ]
 
     if not archives:
-        raise RuntimeError(f'No archives defined for vendor "{spec.name}" on platform "{platform}"')
+        raise RuntimeError(f'No archives defined for vendor "{spec.name}" on platform "{platforms}"')
 
     # Download vendor
     with requests.Session() as session:
@@ -266,8 +287,46 @@ def process_vendor(spec: VendorSpec, overwrite: bool = True) -> None:
 # -----------
 
 def main() -> None:
-    process_vendor(FFMPEG)
-    process_vendor(DENO)
+    parser = argparse.ArgumentParser(
+        description = 'Vendor dependency downloader for development use'
+    )
+
+    parser.add_argument(
+        '-no', '--no-overwrite',
+        action = 'store_true',
+        help = 'Do not overwrite existing vendor files',
+    )
+
+    parser.add_argument(
+        '-p', '--platform',
+        choices = ('windows', 'linux'),
+        nargs = '+',
+        help = 'Target platform (default: current platform)',
+    )
+
+    parser.add_argument(
+        '-v', '--vendor',
+        choices = VENDORS.keys(),
+        nargs = '+',
+        help = 'Vendor to download (default: all)',
+    )
+
+    args = parser.parse_args()
+
+    overwrite = not args.no_overwrite
+    platforms = args.platform
+    
+    if args.vendor:
+        vendors = [VENDORS[name] for name in args.vendor]
+    else:
+        vendors = VENDORS.values()
+
+    for spec in vendors:
+        process_vendor(
+            spec,
+            overwrite = overwrite,
+            platforms = platforms,
+        )
 
 
 if __name__ == '__main__':
