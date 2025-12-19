@@ -6,8 +6,41 @@ const youtubeLinks = document.getElementById('youtube-links');
 const linksSubmit = document.getElementById('links-submit');
 
 const backend = initBackend();
-
 const settings = await backend.loadSetting();
+
+// Save original text for animation
+const originalLinksSubmitText = linksSubmit.textContent;
+
+const eventSource = new EventSource('/download-events');
+
+const dotAnimations = new WeakMap();
+
+let activeDownloads = 0;
+
+eventSource.addEventListener('message', async (e) => {
+    const data = JSON.parse(e.data);
+
+    switch (data.type) {
+        case 'progress':
+            updateCardProgress(data.id, data.percent, data.percent + '%');
+            break;
+        case 'finished':
+            updateCardProgress(data.id, 100, 'Done');
+            activeDownloads--;
+
+            if (activeDownloads === 0) {
+                stopDotAnimation(linksSubmit, 'Download finished!');
+                linksSubmit.disabled = false;
+                linksSubmit.style.cursor = 'auto';
+
+                await sleep(5000);
+
+                linksSubmit.textContent = originalLinksSubmitText;
+            }
+
+            break;
+    }
+});
 
 // UI handling
 if (settings.has_user_config) {
@@ -25,9 +58,27 @@ navButtons.forEach((button) => {
 });
 
 linksSubmit.addEventListener('click', async () => {
+    // Prevent duplication of card inside list
+    resetDownloadList();
+
     const urls = youtubeLinks.value.trim().split('\n');
 
-    await backend.startDownload(urls);
+    startDotAnimation(linksSubmit, 'Injecting');
+    linksSubmit.disabled = true;
+    linksSubmit.style.cursor = 'not-allowed';
+
+    try {
+        const infoResp = await backend.getVideoInfo(urls);
+        createList(list, infoResp.results);
+
+        stopDotAnimation(linksSubmit);
+        startDotAnimation(linksSubmit, 'Injected!! Downloading');
+
+        await backend.startDownload(urls);
+    } catch (err) {
+        stopDotAnimation(linksSubmit, 'Error!!');
+        throw err;
+    }
 });
 
 
@@ -47,6 +98,8 @@ function navigateContent(button) {
 }
 
 function createList(parent, videoInfos) {
+    activeDownloads += videoInfos.length;
+
     // Create list if it doesn't already exist
     if (!parent.querySelector('ol')) {
         const newOl = document.createElement('ol');
@@ -82,7 +135,8 @@ function createCard(parent, title, youtubeId) {
     progress.classList.add('progress');
 
     const status = document.createElement('span');
-    status.textContent = "Starting...";
+    
+    startDotAnimation(status, 'Starting');
 
     progressBar.append(progress);
     progressContainer.append(hr, progressBar, hr.cloneNode(), status);
@@ -91,7 +145,7 @@ function createCard(parent, title, youtubeId) {
     parent.append(card);
 }
 
-function updateCardProgress(youtubeId, percent, status) {
+function updateCardProgress(youtubeId, percent, statusText) {
     const card = document.querySelector(`.card[data-id="${youtubeId}"]`);
     if (!card) return;
 
@@ -99,8 +153,9 @@ function updateCardProgress(youtubeId, percent, status) {
     const progress = progressContainer.querySelector('.progress');
     const statusEl = progressContainer.querySelector('span');
 
+    stopDotAnimation(statusEl, statusText);
+
     progress.style.width = `${percent}%`;
-    statusEl.textContent = status;
 }
 
 function createAllSettings(parent, globalConfig, userConfig = null) {
@@ -271,11 +326,49 @@ function handleCheckbox() {
     });
 }
 
+function startDotAnimation(el, baseText, intervalMs = 500) {
+    stopDotAnimation(el);
+
+    let dots = 0;
+
+    const timer = setInterval(() => {
+        dots = (dots + 1) % 4;
+        el.textContent = baseText + '.'.repeat(dots);
+    }, intervalMs);
+
+    dotAnimations.set(el, timer);
+}
+
+function stopDotAnimation(el, finalText = null) {
+    const timer = dotAnimations.get(el);
+
+    if (timer) {
+        clearInterval(timer);
+        dotAnimations.delete(el);
+    }
+
+    if (finalText !== null) {
+        el.textContent = finalText;
+    }
+}
+
+async function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function resetDownloadList() {
+    document.querySelectorAll('.card .progress-container span').forEach(stopDotAnimation);
+
+    list.innerHTML = '';
+    activeDownloads = 0;
+}
+
 function initBackend() {
     return {
         loadSetting: async () => await fetchJson('/load-settings', 'GET'),
         saveSetting: async (setting) => await fetchJson('/save-setting', 'POST', setting),
         startDownload: async (urls) => await fetchJson('/start-download', 'POST', urls),
+        getVideoInfo: async (urls) => await fetchJson('/get-video-info', 'POST', urls),
     };
 }
 

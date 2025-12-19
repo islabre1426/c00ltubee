@@ -1,12 +1,16 @@
 from pathlib import Path
+from queue import Queue
+from threading import Thread
 import json
 
-from flask import Flask, send_from_directory, jsonify, request
+from flask import Flask, Response, stream_with_context, send_from_directory, jsonify, request
 
 from . import util, downloader, config
 
 ROOT_DIR = util.get_root()
 USER_CONFIG_FILE = Path(ROOT_DIR, 'config.json')
+
+event_queue = Queue()
 
 app = Flask(
     import_name = __name__,
@@ -44,11 +48,45 @@ def save_setting():
     })
 
 @app.post('/start-download')
-def start_download():
+def start_download_route():
     urls = request.json
 
-    downloader.start_download(urls, {})
+    Thread(
+        target = downloader.start_download,
+        args = (urls, {}),
+        daemon = True,
+    ).start()
 
     return jsonify({
         'status': 'ok'
     })
+
+@app.post('/get-video-info')
+def get_video_info():
+    urls = request.json
+    results = []
+
+    downloader.get_video_info(urls, results)
+
+    return jsonify({
+        'status': 'ok',
+        'results': results,
+    })
+
+@app.get('/download-events')
+def download_events():
+    def event_stream():
+        while True:
+            event = event_queue.get()
+            yield f'data: {json.dumps(event)}\n\n'
+    
+    headers = {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'X-Accel-Buffering': 'no',
+    }
+    
+    return Response(
+        stream_with_context(event_stream()),
+        headers = headers,
+    )
