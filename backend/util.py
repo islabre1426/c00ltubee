@@ -1,6 +1,9 @@
 from pathlib import Path
 import json
 
+def get_root() -> Path:
+    return Path(__file__).parent.parent.resolve()
+
 def load_file(file: Path) -> str | None:
     try:
         with file.open() as f:

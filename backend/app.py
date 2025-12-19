@@ -3,10 +3,9 @@ import json
 
 from flask import Flask, send_from_directory, jsonify, request
 
-from .config import DOWNLOADER_SETTINGS
-from . import util
+from . import util, downloader, config
 
-ROOT_DIR = Path(__file__).parent.parent
+ROOT_DIR = util.get_root()
 USER_CONFIG_FILE = Path(ROOT_DIR, 'config.json')
 
 app = Flask(
@@ -23,7 +22,7 @@ def index():
 def load_settings():
     user_settings = util.load_file(USER_CONFIG_FILE)
 
-    result = [DOWNLOADER_SETTINGS]
+    result = [config.DOWNLOADER_SETTINGS]
 
     if user_settings:
         result.append(json.loads(user_settings))
@@ -42,4 +41,14 @@ def save_setting():
 
     return jsonify({
         'status': 'ok',
+    })
+
+@app.post('/start-download')
+def start_download():
+    urls = request.json
+
+    downloader.start_download(urls, {})
+
+    return jsonify({
+        'status': 'ok'
     })

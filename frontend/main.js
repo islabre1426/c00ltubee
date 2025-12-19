@@ -2,6 +2,8 @@ const navButtons = document.querySelectorAll('header nav button');
 const navContents = document.querySelectorAll('main > div');
 const list = document.querySelector('.list');
 const settingsEl = document.querySelector('.settings');
+const youtubeLinks = document.getElementById('youtube-links');
+const linksSubmit = document.getElementById('links-submit');
 
 const backend = initBackend();
 
@@ -14,11 +16,18 @@ if (settings.has_user_config) {
     createAllSettings(settingsEl, settings.result[0]);
 }
 
+// Important: Only handle the following after all settings are loaded!
 handleDropdown();
 handleCheckbox();
 
 navButtons.forEach((button) => {
     button.addEventListener('click', () => navigateContent(button));
+});
+
+linksSubmit.addEventListener('click', async () => {
+    const urls = youtubeLinks.value.trim().split('\n');
+
+    await backend.startDownload(urls);
 });
 
 
@@ -266,6 +275,7 @@ function initBackend() {
     return {
         loadSetting: async () => await fetchJson('/load-settings', 'GET'),
         saveSetting: async (setting) => await fetchJson('/save-setting', 'POST', setting),
+        startDownload: async (urls) => await fetchJson('/start-download', 'POST', urls),
     };
 }
 
