@@ -1,3 +1,7 @@
+//// --------- ////
+//// Variables ////
+//// --------- ////
+
 const navButtons = document.querySelectorAll('header nav button');
 const navContents = document.querySelectorAll('main > div');
 const list = document.querySelector('.list');
@@ -12,14 +16,15 @@ const settings = await backend.loadSetting();
 const originalLinksSubmitText = linksSubmit.textContent;
 
 const eventSource = new EventSource('/download-events');
-
 const dotAnimations = new WeakMap();
-
 let activeDownloads = 0;
 
-eventSource.addEventListener('message', async (e) => {
-    const data = JSON.parse(e.data);
+//// --------- ////
+//// Main flow ////
+//// --------- ////
 
+// SSE handling
+const sseOnMessage = async (data) => {
     switch (data.type) {
         case 'progress':
             updateCardProgress(data.id, data.percent, data.percent + '%');
@@ -30,8 +35,7 @@ eventSource.addEventListener('message', async (e) => {
 
             if (activeDownloads === 0) {
                 stopDotAnimation(linksSubmit, 'Download finished!');
-                linksSubmit.disabled = false;
-                linksSubmit.style.cursor = 'auto';
+                disableHomeComponents('pointer', false);
 
                 await sleep(5000);
 
@@ -40,16 +44,19 @@ eventSource.addEventListener('message', async (e) => {
 
             break;
     }
+}
+
+eventSource.addEventListener('message', async (e) => {
+    await sseOnMessage(JSON.parse(e.data));
 });
 
 // UI handling
-if (settings.has_user_config) {
-    createAllSettings(settingsEl, settings.result[0], settings.result[1]);
-} else {
-    createAllSettings(settingsEl, settings.result[0]);
-}
+createAllSettings(
+    settingsEl,
+    settings.result[0],
+    settings.has_user_config ? settings.result[1] : null,
+);
 
-// Important: Only handle the following after all settings are loaded!
 handleDropdown();
 handleCheckbox();
 
@@ -64,8 +71,7 @@ linksSubmit.addEventListener('click', async () => {
     const urls = youtubeLinks.value.trim().split('\n');
 
     startDotAnimation(linksSubmit, 'Injecting');
-    linksSubmit.disabled = true;
-    linksSubmit.style.cursor = 'not-allowed';
+    disableHomeComponents();
 
     try {
         const infoResp = await backend.getVideoInfo(urls);
@@ -77,18 +83,22 @@ linksSubmit.addEventListener('click', async () => {
         await backend.startDownload(urls);
     } catch (err) {
         stopDotAnimation(linksSubmit, 'Error!!');
+        disableHomeComponents('pointer', false);
         throw err;
     }
 });
 
+//// --------- ////
+//// Functions ////
+//// --------- ////
 
+// -----------------
+// UI Tab navigation
+// -----------------
 
 function navigateContent(button) {
     const navData = button.dataset.nav;
-    if (!navData) return;
-
     const navContent = document.querySelector(`main > div[data-nav="${navData}"]`);
-    if (!navContent) return;
 
     navButtons.forEach((btn) => btn.classList.remove('active'));
     navContents.forEach((content) => content.classList.remove('active'));
@@ -97,8 +107,12 @@ function navigateContent(button) {
     navContent.classList.add('active');
 }
 
-function createList(parent, videoInfos) {
-    activeDownloads += videoInfos.length;
+// -------------
+// Download list
+// -------------
+
+function createList(parent, videos) {
+    activeDownloads += videos.length;
 
     // Create list if it doesn't already exist
     if (!parent.querySelector('ol')) {
@@ -108,9 +122,9 @@ function createList(parent, videoInfos) {
 
     const ol = parent.querySelector('ol');
 
-    videoInfos.forEach((info) => {
+    videos.forEach((v) => {
         const li = document.createElement('li');
-        createCard(li, info.title, info.id);
+        createCard(li, v.title, v.id);
         ol.append(li);
     });
 }
@@ -120,27 +134,19 @@ function createCard(parent, title, youtubeId) {
     card.classList.add('card');
     card.dataset.id = youtubeId;
 
-    const titleEl = document.createElement('span');
-    titleEl.textContent = title;
-
-    const progressContainer = document.createElement('div');
-    progressContainer.classList.add('progress-container');
-
-    const hr = document.createElement('hr');
-
-    const progressBar = document.createElement('div');
-    progressBar.classList.add('progress-bar');
-
-    const progress = document.createElement('div');
-    progress.classList.add('progress');
-
-    const status = document.createElement('span');
+    card.innerHTML = `
+        <span>${title}</span>
+        <div class="progress-container">
+            <hr>
+            <div class="progress-bar">
+                <div class="progress"></div>
+            </div>
+            <hr>
+            <span></span>
+        </div>
+    `;
     
-    startDotAnimation(status, 'Starting');
-
-    progressBar.append(progress);
-    progressContainer.append(hr, progressBar, hr.cloneNode(), status);
-    card.append(titleEl, progressContainer);
+    startDotAnimation(card.querySelector('.progress-container span'), 'Starting');
 
     parent.append(card);
 }
@@ -158,6 +164,17 @@ function updateCardProgress(youtubeId, percent, statusText) {
     progress.style.width = `${percent}%`;
 }
 
+function resetDownloadList() {
+    document.querySelectorAll('.card .progress-container span').forEach(stopDotAnimation);
+
+    list.innerHTML = '';
+    activeDownloads = 0;
+}
+
+// -------------------
+// Settings generation
+// -------------------
+
 function createAllSettings(parent, globalConfig, userConfig = null) {
     if (!parent.querySelector('ul')) {
         const newUl = document.createElement('ul');
@@ -171,7 +188,7 @@ function createAllSettings(parent, globalConfig, userConfig = null) {
 
         createSetting(
             li, config, globalConfig[config],
-            userConfig !== null ? userConfig[config] : null,
+            userConfig ? userConfig[config] : null,
         );
 
         ul.append(li);
@@ -204,55 +221,49 @@ function createDropdown(parent, name, title, options, defaultConfig, userConfig 
     container.classList.add('dropdown-container');
     container.dataset.setting = name;
 
-    const selectButton = document.createElement('div');
-    selectButton.classList.add('select-button');
-
-    const selectedValue = document.createElement('span');
-    selectedValue.classList.add('selected-value');
-
-    const arrow = document.createElement('div');
-    arrow.classList.add('arrow');
-
-    const dropdownList = document.createElement('ul');
-    dropdownList.classList.add('dropdown-list', 'hidden');
+    container.innerHTML = `
+        <div class="select-button">
+            <span class="selected-value"></span>
+            <div class="arrow"></div>
+        </div>
+        <ul class="dropdown-list hidden"></ul>
+    `;
 
     options.forEach((opt) => {
         const dropdownOpt = document.createElement('li');
         dropdownOpt.textContent = opt;
 
-        if (userConfig !== null) {
+        const selectedValue = container.querySelector('.selected-value');
+
+        if (userConfig) {
             if (opt === userConfig) {
                 dropdownOpt.classList.add('selected');
                 selectedValue.textContent = opt;
             }
         } else {
-            if (opt == defaultConfig) {
+            if (opt === defaultConfig) {
                 dropdownOpt.classList.add('selected');
                 selectedValue.textContent = opt;
             }
         }
 
-        dropdownList.append(dropdownOpt);
+        container.querySelector('.dropdown-list').append(dropdownOpt);
     });
 
-    selectButton.append(selectedValue, arrow);
-    container.append(selectButton, dropdownList);
     parent.append(titleEl, container);
 }
 
-/*
-    Handling custom dropdown.
-    Reference: https://blog.logrocket.com/creating-custom-select-dropdown-css/#creating-custom-select-dropdown-scratch-css-javascript
-*/
 function handleDropdown() {
     const containers = document.querySelectorAll('.dropdown-container');
 
     containers.forEach((ctn) => {
         const setting = ctn.dataset.setting;
+
         const selectButton = ctn.querySelector('.select-button');
+        const selectedValue = selectButton.querySelector('.selected-value');
+
         const dropdown = ctn.querySelector('.dropdown-list');
         const options = dropdown.querySelectorAll('li');
-        const selectedValue = selectButton.querySelector('.selected-value');
 
         const toggleDropdown = (expand = null) => {
             const isOpen = expand !== null ? expand : dropdown.classList.contains('hidden');
@@ -291,25 +302,23 @@ function handleDropdown() {
     });
 }
 
+// --------
+// Checkbox
+// --------
+
 function createCheckbox(parent, name, title, defaultConfig, userConfig = null) {
     const container = document.createElement('label');
     container.classList.add('checkbox-container');
     container.dataset.setting = name;
 
-    const titleEl = document.createElement('span');
-    titleEl.textContent = title;
+    container.innerHTML = `
+        <span>${title}</span>
+        <input type="checkbox" name="checkbox-${name}" id="checkbox-${name}" hidden>
+        <div class="checkbox"></div>
+    `;
 
-    const input = document.createElement('input');
-    input.type = 'checkbox';
-    input.name = `checkbox-${name}`;
-    input.id = `checkbox-${name}`;
-    input.hidden = true;
-    input.checked = userConfig !== null ? userConfig : defaultConfig;
+    container.querySelector('input').checked = userConfig ? userConfig : defaultConfig;
 
-    const checkbox = document.createElement('div');
-    checkbox.classList.add('checkbox');
-
-    container.append(titleEl, input, checkbox);
     parent.append(container);
 }
 
@@ -326,14 +335,22 @@ function handleCheckbox() {
     });
 }
 
-function startDotAnimation(el, baseText, intervalMs = 500) {
+// -------------
+// Dot animation
+// -------------
+
+function startDotAnimation(el, text, intervalMs = 500) {
+    // Make sure previous animation are stopped
     stopDotAnimation(el);
+
+    // Improve animation flow by setting text first
+    el.textContent = text;
 
     let dots = 0;
 
     const timer = setInterval(() => {
         dots = (dots + 1) % 4;
-        el.textContent = baseText + '.'.repeat(dots);
+        el.textContent = text + '.'.repeat(dots);
     }, intervalMs);
 
     dotAnimations.set(el, timer);
@@ -347,21 +364,14 @@ function stopDotAnimation(el, finalText = null) {
         dotAnimations.delete(el);
     }
 
-    if (finalText !== null) {
+    if (finalText) {
         el.textContent = finalText;
     }
 }
 
-async function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function resetDownloadList() {
-    document.querySelectorAll('.card .progress-container span').forEach(stopDotAnimation);
-
-    list.innerHTML = '';
-    activeDownloads = 0;
-}
+// -------
+// Backend
+// -------
 
 function initBackend() {
     return {
@@ -373,19 +383,33 @@ function initBackend() {
 }
 
 async function fetchJson(url, method, body = null) {
-    const resp = await fetch(url, {
+    const response = await fetch(url, {
         method: method,
         headers: {
             'Content-Type': 'application/json',
         },
-        body: body !== null ? JSON.stringify(body) : null,
+        body: body ? JSON.stringify(body) : null,
     });
 
-    if (!resp.ok) {
-        throw new Error(`Fetching from ${url} failed: Server returned status ${resp.status}`);
+    if (!response.ok) {
+        throw new Error(`Fetching ${url} failed with status ${response.status}`);
     }
 
-    const data = await resp.json();
-    console.log(data);
-    return data;
+    return await response.json();
+}
+
+// ---------
+// Utilities
+// ---------
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function disableHomeComponents(cursorStyle = 'not-allowed', disabled = true) {
+    youtubeLinks.disabled = disabled;
+    linksSubmit.disabled = disabled;
+
+    youtubeLinks.style.cursor = cursorStyle;
+    linksSubmit.style.cursor = cursorStyle;
 }

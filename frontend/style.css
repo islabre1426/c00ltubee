@@ -44,7 +44,7 @@ body {
     border: var(--border);
 
     margin: 0 auto;
-    max-width: 55rem;
+    max-width: 60rem;
     height: 100vh;
 
     display: flex;
@@ -57,6 +57,7 @@ hr {
     margin: 0;
 }
 
+/* --- HEADERS --- */
 header {
     text-align: center;
 }
@@ -85,6 +86,7 @@ header nav hr {
     margin: var(--space-size);
 }
 
+/* --- MAIN --- */
 main {
     height: 100%;
 }
@@ -97,14 +99,16 @@ main > div {
     align-items: center;
 }
 
-.list, .settings {
-    padding: var(--space-size);
-}
-
 main > div.active {
     display: flex;
 }
 
+.list, .settings {
+    padding: var(--space-size);
+    font-size: var(--font-md);
+}
+
+/* -- Home -- */
 .home hr {
     width: 100%;
 }
@@ -121,10 +125,7 @@ main > div.active {
     padding: var(--space-size);
 }
 
-.list, .settings {
-    font-size: var(--font-md);
-}
-
+/* -- Download list -- */
 .list ol {
     margin: 0;
     width: 100%;
@@ -134,6 +135,7 @@ main > div.active {
     width: 100%;
 }
 
+/* -- Settings -- */
 .settings {
     margin: 0 auto;
     max-width: 40rem;
@@ -154,6 +156,7 @@ main > div.active {
     margin: var(--space-size);
 }
 
+/* - Progress bar - */
 .progress-container {
     display: flex;
     align-items: center;
@@ -181,10 +184,7 @@ main > div.active {
     text-align: right;
 }
 
-/*
-    Custom dropdown menu tailored to current UI.
-    Reference: https://blog.logrocket.com/creating-custom-select-dropdown-css/#creating-custom-select-dropdown-scratch-css-javascript
-*/
+/* - Dropdown menu - */
 .dropdown-container {
     position: relative;
 }
@@ -240,10 +240,7 @@ main > div.active {
     display: none;
 }
 
-/*
-    Custom checkbox tailored to current UI.
-    Reference: https://www.w3schools.com/howto/howto_css_custom_checkbox.asp
-*/
+/* - Checkbox - */
 .checkbox-container {
     display: flex;
     justify-content: space-between;
