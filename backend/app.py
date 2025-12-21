@@ -5,31 +5,30 @@ import json
 
 from flask import Flask, Response, stream_with_context, send_from_directory, jsonify, request
 
-from . import util, downloader, config
-
-ROOT_DIR = util.get_root()
-USER_CONFIG_FILE = Path(ROOT_DIR, 'config.json')
+from . import downloader, config
 
 event_queue = Queue()
 
 app = Flask(
     import_name = __name__,
-    static_folder = Path(ROOT_DIR, 'frontend'),
+    static_folder = Path(config.ROOT_DIR, 'frontend'),
     static_url_path = '/',
 )
+
 
 @app.get('/')
 def index():
     return send_from_directory(app.static_folder, 'index.html')
 
+
 @app.get('/load-settings')
 def load_settings():
-    user_settings = util.load_file(USER_CONFIG_FILE)
+    user_settings = config.load_user_setting()
 
     result = [config.DOWNLOADER_SETTINGS]
 
     if user_settings:
-        result.append(json.loads(user_settings))
+        result.append(user_settings)
 
     return jsonify({
         'status': 'ok',
@@ -37,15 +36,17 @@ def load_settings():
         'result': result,
     })
 
+
 @app.post('/save-setting')
 def save_setting():
     setting = request.json
 
-    util.save_setting(USER_CONFIG_FILE, setting)
+    config.save_user_setting(setting)
 
     return jsonify({
         'status': 'ok',
     })
+
 
 @app.post('/start-download')
 def start_download_route():
@@ -61,6 +62,7 @@ def start_download_route():
         'status': 'ok'
     })
 
+
 @app.post('/get-video-info')
 def get_video_info():
     urls = request.json
@@ -72,6 +74,7 @@ def get_video_info():
         'status': 'ok',
         'results': results,
     })
+
 
 @app.get('/download-events')
 def download_events():

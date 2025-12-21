@@ -3,10 +3,8 @@ import platform
 
 from yt_dlp import YoutubeDL
 
-from . import util, app
+from . import app, config
 
-ROOT_DIR = util.get_root()
-VENDOR_DIR = Path(ROOT_DIR, 'vendor')
 CURRENT_OS = platform.system().lower()
 
 match CURRENT_OS:
@@ -15,8 +13,8 @@ match CURRENT_OS:
     case 'linux':
         deno_exe = 'deno'
 
-FFMPEG_LOCATION = str(Path(VENDOR_DIR, 'ffmpeg', CURRENT_OS, 'bin'))
-DENO_LOCATION = str(Path(VENDOR_DIR, 'deno', deno_exe))
+FFMPEG_LOCATION = str(Path(config.VENDOR_DIR, 'ffmpeg', CURRENT_OS, 'bin'))
+DENO_LOCATION = str(Path(config.VENDOR_DIR, 'deno', deno_exe))
 DOWNLOAD_LOCATION = str(Path(Path.home(), 'Downloads'))
 
 YDL_OPTS = {
@@ -33,6 +31,29 @@ YDL_OPTS = {
 }
 
 
+def process_downloader_settings():
+    settings = config.get_downloader_setting()
+
+    video_format = settings['default_video_format']
+    audio_format = settings['default_audio_format']
+    audio_only = settings['audio_only']
+
+    result = {
+        'format': f'{video_format}/bestvideo*+bestaudio/best'
+    }
+
+    if audio_only:
+        result.update({
+            'format': f'{audio_format}/bestaudio/best',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': audio_format,
+            }]
+        })
+
+    return result
+
+
 def get_video_info(urls: list[str], results_list: list[dict]):
     with YoutubeDL(YDL_OPTS) as ydl:
         for url in urls:
@@ -43,6 +64,7 @@ def get_video_info(urls: list[str], results_list: list[dict]):
                 'id': info['id'],
                 'title': info['title'],
             })
+
 
 def start_download(urls: list[str], additional_opts: dict):
     def hook(d):
@@ -57,13 +79,15 @@ def start_download(urls: list[str], additional_opts: dict):
                 'type': 'finished',
                 'id': d['info_dict']['id'],
             })
+    
+    downloader_settings = process_downloader_settings()
 
     opts = {
         **YDL_OPTS,
         **additional_opts,
+        **downloader_settings,
         'progress_hooks': [hook],
     }
 
-    for url in urls:
-        with YoutubeDL(opts) as ydl:
-            ydl.download(url)
+    with YoutubeDL(opts) as ydl:
+        ydl.download(urls)

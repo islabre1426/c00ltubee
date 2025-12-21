@@ -1,3 +1,7 @@
+from pathlib import Path
+import json
+
+
 DOWNLOADER_SETTINGS = {
     'default_video_format': {
         'title': 'Default video format',
@@ -17,3 +21,51 @@ DOWNLOADER_SETTINGS = {
         'default': False,
     }
 }
+
+ROOT_DIR = Path(__file__).parent.parent.resolve()
+VENDOR_DIR = Path(ROOT_DIR, 'vendor')
+USER_CONFIG_FILE = Path(ROOT_DIR, 'config.json')
+
+
+def load_user_setting() -> dict | None:
+    try:
+        with USER_CONFIG_FILE.open() as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None
+    except json.JSONDecodeError:
+        raise RuntimeError(f'ERROR: Failed to decode user config file {USER_CONFIG_FILE}')
+    
+
+def save_user_setting(setting: dict) -> None:
+    def save_json(file: Path, obj: dict) -> None:
+        with file.open('w') as f:
+            f.write(json.dumps(obj, indent = 4))
+            return None
+
+    config = load_user_setting()
+
+    if config is None:
+        save_json(USER_CONFIG_FILE, setting)
+        return None
+    
+    config.update(setting)
+
+    save_json(USER_CONFIG_FILE, config)
+    return None
+
+
+def get_downloader_setting():
+    settings = {}
+
+    for s in DOWNLOADER_SETTINGS:
+        settings.update({
+            s: DOWNLOADER_SETTINGS[s]['default']
+        })
+
+    user_settings = load_user_setting()
+
+    if user_settings is not None:
+        settings.update(user_settings)
+    
+    return settings
