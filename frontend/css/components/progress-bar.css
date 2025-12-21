@@ -1,0 +1,26 @@
+.progress-container {
+    display: flex;
+    align-items: center;
+}
+
+.progress-container hr {
+    border: solid white;
+    height: 1rem;
+}
+
+.progress-bar {
+    display: flex;
+    width: 100%;
+}
+
+.progress {
+    height: 1rem;
+    background-color: red;
+}
+
+.progress-container span {
+    margin: 0 1rem;
+    width: 12rem;
+
+    text-align: right;
+}

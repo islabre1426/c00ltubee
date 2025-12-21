@@ -1,0 +1,56 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+@font-face {
+    font-family: "Source Sans 3";
+    src:
+        local("Source Sans 3"),
+        url("../fonts/SourceSans3-VariableFont_wght.ttf"),
+        url("../fonts/static/SourceSans3-Regular.ttf");
+    font-optical-sizing: auto;
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --border: 0.4rem solid red;
+    --font-lg: 4rem;
+    --font-md: 2rem;
+    --space-size: 0.4rem;
+}
+
+button, textarea {
+    background-color: inherit;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    border: 0;
+}
+
+button {
+    cursor: pointer;
+}
+
+body {
+    background-color: black;
+    color: white;
+
+    font-family: "Source Sans 3", sans-serif;
+    font-size: var(--font-lg);
+
+    border: var(--border);
+
+    margin: 0 auto;
+    max-width: 60rem;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+hr {
+    border: var(--border);
+    border-bottom: 0;
+    margin: 0;
+}
