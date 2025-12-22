@@ -1,7 +1,7 @@
 # c00ltubee
 A Youtube Downloader inspired by c00lgui appearance.
 
-For end users, go to Releases to get the binary files.
+For end users, go to [Releases](../../releases) to get the binary files.
 
 ## Technologies
 - Backend: Flask.
@@ -37,10 +37,18 @@ python -m venv .venv-linux
 source .venv-linux/bin/activate
 ```
 
-#### Install dependencies
+#### Install Python dependencies
 ```
 pip install -r requirements.txt
 ```
+
+#### Install vendor dependencies
+Since yt-dlp depends on deno and ffmpeg, to get them, run the download script:
+```
+python download-vendor.py
+```
+
+Append `--help` to above command to get list of options.
 
 #### Run this software
 ```
