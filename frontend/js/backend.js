@@ -1,4 +1,6 @@
-export function initBackend() {
+const backend = initBackend();
+
+function initBackend() {
     return {
         loadSetting: async () => await fetchJson('/load-settings', 'GET'),
         saveSetting: async (setting) => await fetchJson('/save-setting', 'POST', setting),
@@ -12,6 +14,10 @@ export function initBackend() {
             })
         },
     };
+}
+
+export function getBackend() {
+    return backend;
 }
 
 async function fetchJson(url, method, body = null) {

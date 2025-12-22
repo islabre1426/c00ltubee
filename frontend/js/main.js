@@ -4,7 +4,7 @@ import { createAllSettings } from "./components/settings.js";
 import { handleDropdown } from "./components/dropdownMenu.js";
 import { handleCheckbox } from "./components/checkbox.js";
 import { startDotAnimation, stopDotAnimation } from "./components/dotAnimation.js";
-import { initBackend } from "./backend.js";
+import { getBackend } from "./backend.js";
 import { disableHomeComponents } from "./util.js";
 import { onMessage } from "./sse.js";
 
@@ -16,9 +16,9 @@ const settingsEl = document.querySelector('.settings');
 const youtubeLinks = document.getElementById('youtube-links');
 const linksSubmit = document.getElementById('links-submit');
 
-const backend = initBackend();
+const backend = getBackend();
 const settings = await backend.loadSetting();
-backend.subscribeEvent(onMessage)
+backend.subscribeEvent(onMessage);
 
 // UI handling
 createAllSettings(

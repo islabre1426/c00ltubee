@@ -1,3 +1,7 @@
+import { getBackend } from "../backend.js";
+
+const backend = getBackend();
+
 export function createCheckbox(parent, name, title, defaultConfig, userConfig = null) {
     const container = document.createElement('label');
     container.classList.add('checkbox-container');

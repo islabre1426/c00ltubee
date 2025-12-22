@@ -1,3 +1,7 @@
+import { getBackend } from "../backend.js";
+
+const backend = getBackend();
+
 export function createDropdown(parent, name, title, options, defaultConfig, userConfig = null) {
     const titleEl = document.createElement('span');
     titleEl.textContent = title;
