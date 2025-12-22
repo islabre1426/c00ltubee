@@ -59,6 +59,13 @@ Go to your web browser and open http://127.0.0.1:5000.
 
 Now you're good to go!
 
+## Build this software
+To build this software, run:
+```
+python build.py
+```
+on Linux or Windows to get binary for respective platform.
+
 ## Credit
 - Flask: For lightweight web server.
 - yt-dlp: For reliable downloader.
