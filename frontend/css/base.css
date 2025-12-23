@@ -54,3 +54,20 @@ hr {
     border-bottom: 0;
     margin: 0;
 }
+
+/* Browser-specific scrollbar styling */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-clip: content-box;
+    border: 3px solid black;
+    background-color: red;
+}
+
+@-moz-document url-prefix() {
+    body {
+        scrollbar-color: red black;
+    }
+}
