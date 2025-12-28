@@ -1,0 +1,13 @@
+[project]
+name = "c00ltubee"
+version = "0.1.0"
+description = "A Youtube Downloader inspired by c00lgui appearance"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "flask>=3.1.2",
+    "pillow>=12.0.0",
+    "pyinstaller>=6.17.0",
+    "tqdm>=4.67.1",
+    "yt-dlp[default]>=2025.12.8",
+]

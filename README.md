@@ -3,6 +3,8 @@ A Youtube Downloader inspired by c00lgui appearance.
 
 For end users, go to [Releases](../../releases) to get the binary files.
 
+By default, downloaded files will be saved under `C:\Users\<your-user-name>\Downloads` on Windows or `~/Downloads` on Linux. Setting to change this will be implemented in the future.
+
 ## Technologies
 - Backend: Flask.
 - Frontend: HTML + CSS + JS.
@@ -11,7 +13,7 @@ For end users, go to [Releases](../../releases) to get the binary files.
 
 ## How to run this software from source
 ### Requirement
-- Python installed (latest recommended)
+- [uv](https://docs.astral.sh/uv/)
 
 ### Setup
 #### Clone this repo
@@ -27,19 +29,20 @@ cd c00ltubee
 #### Create virtual environment
 On Windows (using PowerShell):
 ```
-python -m venv .venv-windows
-.\.venv-windows\Scripts\Activate.ps1
+uv venv .venv-windows
+.\.venv-windows\Scripts\activate
 ```
 
 On Linux (using bash):
 ```
-python -m venv .venv-linux
+uv venv .venv-linux
 source .venv-linux/bin/activate
 ```
 
 #### Install Python dependencies
+Make sure you're currently in one of the virtual environment, then run this command:
 ```
-pip install -r requirements.txt
+uv sync --active
 ```
 
 #### Install vendor dependencies
@@ -70,4 +73,5 @@ on Linux or Windows to get binary for respective platform.
 - Flask: For lightweight web server.
 - yt-dlp: For reliable downloader.
 - PyInstaller: For binaries distribution.
+- uv: For awesome Python project and package manager.
 - My friend: For inspiration!
