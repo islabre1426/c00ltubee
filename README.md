@@ -13,7 +13,7 @@ By default, downloaded files will be saved under `C:\Users\<your-user-name>\Down
 
 ## How to run this software from source
 ### Requirement
-- [uv](https://docs.astral.sh/uv/)
+- Python >= 3.14
 
 ### Setup
 #### Clone this repo
@@ -29,20 +29,20 @@ cd c00ltubee
 #### Create virtual environment
 On Windows (using PowerShell):
 ```
-uv venv .venv-windows
+python -m venv .venv-windows
 .\.venv-windows\Scripts\activate
 ```
 
 On Linux (using bash):
 ```
-uv venv .venv-linux
+python -m venv .venv-linux
 source .venv-linux/bin/activate
 ```
 
 #### Install Python dependencies
 Make sure you're currently in one of the virtual environment, then run this command:
 ```
-uv sync --active
+pip install -r requirements.txt
 ```
 
 #### Install vendor dependencies
