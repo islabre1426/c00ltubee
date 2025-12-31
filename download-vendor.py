@@ -49,12 +49,12 @@ FFMPEG = VendorSpec(
     archives = [
         VendorArchive(
             platform = 'linux',
-            filename = 'ffmpeg-n8.0-latest-linux64-gpl-8.0.tar.xz',
+            filename = 'ffmpeg-n8.0-latest-linux64-gpl-shared-8.0.tar.xz',
             extracted_name = 'linux',
         ),
         VendorArchive(
             platform = 'windows',
-            filename = 'ffmpeg-n8.0-latest-win64-gpl-8.0.zip',
+            filename = 'ffmpeg-n8.0-latest-win64-gpl-shared-8.0.zip',
             extracted_name = 'windows',
         )
     ]
