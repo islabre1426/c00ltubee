@@ -87,6 +87,9 @@ def start_download(urls: list[str], additional_opts: dict):
         **additional_opts,
         **downloader_settings,
         'progress_hooks': [hook],
+        'outtmpl': {
+            'default': '%(title)s.%(ext)s',
+        },
     }
 
     with YoutubeDL(opts) as ydl:
