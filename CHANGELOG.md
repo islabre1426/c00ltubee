@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Use ffmpeg "shared" version instead of static one for size reduction.
 - Default filename output now is "%(title)s.%(ext)s" instead of "%(title)s \[%(id)s\].%(ext)s" (yt-dlp default).
+- Use [uv](https://docs.astral.sh/uv/) as Python project and package manager instead of traditional `pip` and `requirements.txt`.
 
 ## [0.1.0] - 2025-12-22
 

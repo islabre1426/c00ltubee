@@ -13,7 +13,8 @@ By default, downloaded files will be saved under `C:\Users\<your-user-name>\Down
 
 ## How to run this software from source
 ### Requirement
-- Python >= 3.14
+- [uv](https://docs.astral.sh/uv/)
+- git
 
 ### Setup
 #### Clone this repo
@@ -26,36 +27,22 @@ git clone https://github.com/islabre1426/c00ltubee.git
 cd c00ltubee
 ```
 
-#### Create virtual environment
-On Windows (using PowerShell):
-```
-python -m venv .venv-windows
-.\.venv-windows\Scripts\activate
-```
-
-On Linux (using bash):
-```
-python -m venv .venv-linux
-source .venv-linux/bin/activate
-```
-
 #### Install Python dependencies
-Make sure you're currently in one of the virtual environment, then run this command:
 ```
-pip install -r requirements.txt
+uv sync
 ```
 
 #### Install vendor dependencies
 Since yt-dlp depends on deno and ffmpeg, to get them, run the download script:
 ```
-python download-vendor.py
+uv run python download-vendor.py
 ```
 
 Append `--help` to above command to get list of options.
 
 #### Run this software
 ```
-python main.py
+uv run python main.py
 ```
 
 Go to your web browser and open http://127.0.0.1:5000.
@@ -65,7 +52,7 @@ Now you're good to go!
 ## Build this software
 To build this software, run:
 ```
-python build.py
+uv run python build.py
 ```
 on Linux or Windows to get binary for respective platform.
 

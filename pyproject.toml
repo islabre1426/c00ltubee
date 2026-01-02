@@ -1,0 +1,11 @@
+[project]
+name = "c00ltubee"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "flask>=3.1.2",
+    "pillow>=12.1.0",
+    "pyinstaller>=6.17.0",
+    "tqdm>=4.67.1",
+    "yt-dlp[default]>=2025.12.8",
+]
