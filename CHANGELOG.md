@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Landing page for information about this project, served via `/docs` folder.
 - [Open Graph Protocol](https://ogp.me/) support for `/docs` page.
 - Custom scrollbar for UI consistency.
+- Overview image of this project architecture
 
 ### Changed
 

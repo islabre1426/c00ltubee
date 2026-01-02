@@ -11,6 +11,9 @@ By default, downloaded files will be saved under `C:\Users\<your-user-name>\Down
 - Downloader: yt-dlp.
 - Binary compilation: PyInstaller.
 
+## Architecture Overview
+![c00ltubee architecture](./docs/images/c00ltubee.drawio.svg)
+
 ## How to run this software from source
 ### Requirement
 - [uv](https://docs.astral.sh/uv/)
