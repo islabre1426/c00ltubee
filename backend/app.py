@@ -2,10 +2,13 @@ from pathlib import Path
 from queue import Queue
 from threading import Thread
 import json
+import tkinter
+from tkinter import filedialog
+import ctypes
 
 from flask import Flask, Response, stream_with_context, send_from_directory, jsonify, request
 
-from . import downloader, config
+from . import downloader, config, util
 
 event_queue = Queue()
 
@@ -25,7 +28,12 @@ def index():
 def load_settings():
     user_settings = config.load_user_setting()
 
-    result = [config.DOWNLOADER_SETTINGS]
+    result = [
+        [
+            config.GLOBAL_SETTINGS,
+            config.DOWNLOADER_SETTINGS,
+        ]
+    ]
 
     if user_settings:
         result.append(user_settings)
@@ -93,3 +101,12 @@ def download_events():
         stream_with_context(event_stream()),
         headers = headers,
     )
+
+@app.get('/browse-folder')
+def browse_folder():
+    chosen_folder = util.browse_folder()
+
+    return jsonify({
+        'status': 'ok',
+        'result': chosen_folder,
+    })

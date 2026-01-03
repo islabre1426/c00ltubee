@@ -1,6 +1,13 @@
 from pathlib import Path
 import json
 
+GLOBAL_SETTINGS = {
+    'download_location': {
+        'title': 'Download location',
+        'type': 'folder-picker',
+        'default': str(Path(Path.home(), 'Downloads')),
+    }
+}
 
 DOWNLOADER_SETTINGS = {
     'default_video_format': {
@@ -30,7 +37,11 @@ USER_CONFIG_FILE = Path(ROOT_DIR, 'config.json')
 def load_user_setting() -> dict | None:
     try:
         with USER_CONFIG_FILE.open() as f:
-            return json.load(f)
+            content = f.read()
+
+            # Only load if it is not empty
+            if content:
+                return json.loads(content)
     except FileNotFoundError:
         return None
     except json.JSONDecodeError:
@@ -55,8 +66,13 @@ def save_user_setting(setting: dict) -> None:
     return None
 
 
-def get_downloader_setting():
+def get_all_settings():
     settings = {}
+
+    for s in GLOBAL_SETTINGS:
+        settings.update({
+            s: GLOBAL_SETTINGS[s]['default']
+        })
 
     for s in DOWNLOADER_SETTINGS:
         settings.update({

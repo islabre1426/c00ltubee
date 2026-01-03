@@ -15,7 +15,6 @@ match CURRENT_OS:
 
 FFMPEG_LOCATION = str(Path(config.VENDOR_DIR, 'ffmpeg', CURRENT_OS, 'bin'))
 DENO_LOCATION = str(Path(config.VENDOR_DIR, 'deno', deno_exe))
-DOWNLOAD_LOCATION = str(Path(Path.home(), 'Downloads'))
 
 YDL_OPTS = {
     'color': 'never',
@@ -25,20 +24,21 @@ YDL_OPTS = {
             'path': DENO_LOCATION,
         },
     },
-    'paths': {
-        'home': DOWNLOAD_LOCATION,
-    },
 }
 
 
-def process_downloader_settings():
-    settings = config.get_downloader_setting()
+def process_settings():
+    settings = config.get_all_settings()
 
     video_format = settings['default_video_format']
     audio_format = settings['default_audio_format']
     audio_only = settings['audio_only']
+    download_location = settings['download_location']
 
     result = {
+        'paths': {
+            'home': download_location,
+        },
         'format': f'{video_format}/bestvideo*+bestaudio/best'
     }
 
@@ -80,7 +80,7 @@ def start_download(urls: list[str], additional_opts: dict):
                 'id': d['info_dict']['id'],
             })
     
-    downloader_settings = process_downloader_settings()
+    downloader_settings = process_settings()
 
     opts = {
         **YDL_OPTS,

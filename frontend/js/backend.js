@@ -2,7 +2,7 @@ const backend = initBackend();
 
 function initBackend() {
     return {
-        loadSetting: async () => await fetchJson('/load-settings', 'GET'),
+        loadSettings: async () => await fetchJson('/load-settings', 'GET'),
         saveSetting: async (setting) => await fetchJson('/save-setting', 'POST', setting),
         startDownload: async (urls) => await fetchJson('/start-download', 'POST', urls),
         getVideoInfo: async (urls) => await fetchJson('/get-video-info', 'POST', urls),
@@ -13,6 +13,7 @@ function initBackend() {
                 handler(JSON.parse(e.data));
             })
         },
+        browseFolder: async () =>  await fetchJson('/browse-folder', 'GET'),
     };
 }
 

@@ -1,7 +1,7 @@
 # TODO
 - [x] Remove Youtube ID from output filename
 - [ ] Add setting to adjust:
-    - [ ] Download location
+    - [x] Download location
     - [ ] Filename output
 - [ ] Make this an app (via Pywebview? Qt? Electron? Tauri?)
 - [ ] Have a setting to a website version

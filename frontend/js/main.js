@@ -7,6 +7,7 @@ import { startDotAnimation, stopDotAnimation } from "./components/dotAnimation.j
 import { getBackend } from "./backend.js";
 import { disableHomeComponents } from "./util.js";
 import { onMessage } from "./sse.js";
+import { handleFolderPicker } from "./components/folderPicker.js";
 
 
 const navButtons = document.querySelectorAll('header nav button');
@@ -17,7 +18,7 @@ const youtubeLinks = document.getElementById('youtube-links');
 const linksSubmit = document.getElementById('links-submit');
 
 const backend = getBackend();
-const settings = await backend.loadSetting();
+const settings = await backend.loadSettings();
 backend.subscribeEvent(onMessage);
 
 // UI handling
@@ -29,6 +30,7 @@ createAllSettings(
 
 handleDropdown();
 handleCheckbox();
+handleFolderPicker();
 
 navButtons.forEach((button) => {
     button.addEventListener('click', () => navigateContent(button, navButtons, navContents));

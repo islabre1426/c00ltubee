@@ -1,7 +1,8 @@
 import { createDropdown } from "./dropdownMenu.js";
 import { createCheckbox } from "./checkbox.js";
+import { createFolderPicker } from "./folderPicker.js";
 
-export function createAllSettings(settingsEl, globalConfig, userConfig = null) {
+export function createAllSettings(settingsEl, globalConfigs, userConfig = null) {
     if (!settingsEl.querySelector('ul')) {
         const newUl = document.createElement('ul');
         settingsEl.append(newUl);
@@ -9,16 +10,18 @@ export function createAllSettings(settingsEl, globalConfig, userConfig = null) {
 
     const ul = settingsEl.querySelector('ul');
 
-    Object.keys(globalConfig).forEach((config) => {
-        const li = document.createElement('li');
-
-        createSetting(
-            li, config, globalConfig[config],
-            userConfig ? userConfig[config] : null,
-        );
-
-        ul.append(li);
-    });
+    globalConfigs.forEach((gc) => {
+        Object.keys(gc).forEach((config) => {
+            const li = document.createElement('li');
+    
+            createSetting(
+                li, config, gc[config],
+                userConfig ? userConfig[config] : null,
+            );
+    
+            ul.append(li);
+        });
+    })
 }
 
 function createSetting(parent, name, info, userConfig = null) {
@@ -31,6 +34,9 @@ function createSetting(parent, name, info, userConfig = null) {
             break;
         case 'checkbox':
             createCheckbox(setting, name, info.title, info.default, userConfig);
+            break;
+        case 'folder-picker':
+            createFolderPicker(setting, name, info.title, info.default, userConfig);
             break;
         default:
             console.error('Invalid setting type:', info.type);

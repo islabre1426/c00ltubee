@@ -1,0 +1,25 @@
+.folder-picker-container {
+    width: 100%;
+}
+
+.folder-picker-container div {
+    display: flex;
+    align-items: center;
+}
+
+.folder-picker-container .path {
+    width: 100%;
+    border: var(--border);
+    border-width: 0.2rem;
+    padding: 0 var(--space-size);
+}
+
+.folder-picker-container button {
+    border: var(--border);
+    border-width: 0.2rem;
+    margin-left: var(--space-size);
+}
+
+.folder-picker-container .icon {
+    width: var(--font-md);
+}
