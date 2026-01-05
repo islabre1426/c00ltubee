@@ -2,10 +2,11 @@ from pathlib import Path
 import json
 
 GLOBAL_SETTINGS = {
-    'download_location': {
-        'title': 'Download location',
-        'type': 'folder-picker',
-        'default': str(Path(Path.home(), 'Downloads')),
+    'theme': {
+        'title': 'Theme',
+        'type': 'dropdown',
+        'default': 'c00lkidd',
+        'options': ['c00lkidd', 'bluudud', 'pr3typriincess'],
     }
 }
 
@@ -26,6 +27,11 @@ DOWNLOADER_SETTINGS = {
         'title': 'Audio only',
         'type': 'checkbox',
         'default': False,
+    },
+    'download_location': {
+        'title': 'Download location',
+        'type': 'folder-picker',
+        'default': str(Path(Path.home(), 'Downloads')),
     }
 }
 
