@@ -11,3 +11,7 @@ dist
 
 ## Vendor binaries
 vendor
+
+## Node-generated files
+node_modules/
+frontend-dist/
