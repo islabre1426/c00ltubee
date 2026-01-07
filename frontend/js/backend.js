@@ -1,6 +1,9 @@
 const backend = initBackend();
 
 function initBackend() {
+    const api = window.api;
+
+    /*
     return {
         loadSettings: async () => await fetchJson('/load-settings', 'GET'),
         saveSetting: async (setting) => await fetchJson('/save-setting', 'POST', setting),
@@ -15,6 +18,16 @@ function initBackend() {
         },
         browseFolder: async () =>  await fetchJson('/browse-folder', 'GET'),
     };
+    */
+
+    return {
+        loadSettings: () => api.loadSettings(),
+        saveSetting: (setting) => api.saveSetting(setting),
+        startDownload: (urls) => api.startDownload(urls),
+        getVideoInfo: (urls) => api.getVideoInfo(urls),
+        subscribeEvent: (handler) => api.downloadEvents(handler),
+        browseFolder: () => api.browseFolder(),
+    }
 }
 
 export function getBackend() {

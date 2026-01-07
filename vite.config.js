@@ -5,7 +5,7 @@ export default defineConfig({
     root: nodePath.join(import.meta.dirname, 'frontend'),
     base: '',
     build: {
-        outDir: nodePath.join(import.meta.dirname, 'frontend-dist'),
+        outDir: nodePath.join(import.meta.dirname, 'renderer'),
         emptyOutDir: true,
     },
 });
