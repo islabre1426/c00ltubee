@@ -8,7 +8,6 @@ import { getBackend } from "./backend.js";
 import { disableHomeComponents } from "./util.js";
 import { onMessage } from "./sse.js";
 import { handleFolderPicker } from "./components/folderPicker.js";
-import { handleThemeChoose, handleThemeOnLoad } from "./components/theme.js";
 
 
 const navButtons = document.querySelectorAll('header nav button');
@@ -20,24 +19,18 @@ const linksSubmit = document.getElementById('links-submit');
 
 const backend = getBackend();
 const settings = await backend.loadSettings();
-const userSettings = settings.has_user_config ? settings.result[1] : null;
 backend.subscribeEvent(onMessage);
 
 // UI handling
 createAllSettings(
     settingsEl,
     settings.result[0],
-    userSettings,
+    settings.has_user_config ? settings.result[1] : null,
 );
 
 handleDropdown();
 handleCheckbox();
 handleFolderPicker();
-handleThemeChoose();
-
-if ((userSettings) && ("theme" in userSettings)) {
-    handleThemeOnLoad(userSettings['theme']);
-}
 
 navButtons.forEach((button) => {
     button.addEventListener('click', () => navigateContent(button, navButtons, navContents));

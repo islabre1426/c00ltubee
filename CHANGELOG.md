@@ -14,7 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom scrollbar for UI consistency.
 - Overview image of this project architecture.
 - Option to choose downloaded file location (default to ~/Downloads).
-- Theme (bluudud and pr3typrincess).
 
 ### Changed
 
