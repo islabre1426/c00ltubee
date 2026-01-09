@@ -1,0 +1,68 @@
+main {
+    height: 100%;
+}
+
+main > div {
+    height: 100%;
+
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+
+main > div.active {
+    display: flex;
+}
+
+.list, .settings {
+    padding: var(--space-size);
+    font-size: var(--font-md);
+}
+
+/* -- Home -- */
+.home hr {
+    width: 100%;
+}
+
+#youtube-links {
+    height: 100%;
+    width: 100%;
+
+    font-size: var(--font-md);
+
+    outline: none;
+    resize: none;
+
+    padding: var(--space-size);
+}
+
+/* -- Download list -- */
+.list ol {
+    margin: 0;
+    width: 100%;
+}
+
+.card {
+    width: 100%;
+}
+
+/* -- Settings -- */
+.settings {
+    margin: 0 auto;
+    max-width: 40rem;
+}
+
+.settings > ul {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+}
+
+.setting {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin: var(--space-size);
+}

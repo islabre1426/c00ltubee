@@ -2,6 +2,25 @@ import nodePath from 'node:path';
 import nodeOs from 'node:os';
 import nodeFs from 'node:fs/promises';
 
+const rootDir = nodePath.join(import.meta.dirname);
+const vendorDir = nodePath.join(rootDir, '..', 'vendor');
+
+const currentOs = process.platform;
+let userConfigFolder;
+
+switch (currentOs) {
+    case 'win32':
+        userConfigFolder = nodePath.join(process.env['LOCALAPPDATA'], 'c00ltubee');
+        break;
+    case 'linux':
+        userConfigFolder = nodePath.join(nodeOs.homedir(), '.config', 'c00ltubee');
+        break;
+    default:
+        userConfigFolder = nodePath.join(import.meta.dirname);
+}
+
+const userConfigFile = nodePath.join(userConfigFolder, 'config.json');
+
 export const globalSettings = {
     theme: {
         title: 'Theme',
@@ -36,16 +55,10 @@ export const downloaderSettings = {
     }
 };
 
-const rootDir = nodePath.join(import.meta.dirname);
-const vendorDir = nodePath.join(rootDir, 'vendor');
-const userConfigFile = nodePath.join(rootDir, 'config.json');
-
 export async function loadUserSetting() {
+    // Silently ignore on the renderer side if the config file does not exist
     try {
-        const contents = await nodeFs.readFile(userConfigFile, {
-            encoding: 'utf8',
-        });
-
+        const contents = await nodeFs.readFile(userConfigFile, { encoding: 'utf8' });
         return JSON.parse(contents);
     } catch (err) {
         console.error(err);
@@ -72,6 +85,16 @@ export async function saveUserSetting(setting) {
             ...userSettings,
             ...setting,
         };
+    }
+
+    // Make sure the config folder exists
+    let configFolderExists;
+    try {
+        configFolderExists = await nodeFs.opendir(userConfigFolder);
+    } catch (err) {
+        await nodeFs.mkdir(userConfigFolder, { recursive: true });
+    } finally {
+        configFolderExists?.close();
     }
 
     await saveAsJson(userConfigFile, setting);
