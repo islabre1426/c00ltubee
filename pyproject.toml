@@ -1,7 +1,9 @@
 [project]
 name = "c00ltubee"
-version = "0.1.0"
+version = "1.0.0"
 description = "A Youtube downloader based on c00lgui appearance"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "pywebview>=6.1",
+]
