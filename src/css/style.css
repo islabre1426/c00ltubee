@@ -1,0 +1,64 @@
+/* ---- GLOBAL STYLE ---- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+@font-face {
+    font-family: "Source Sans 3";
+    src:
+        local("Source Sans 3"),
+        url("/src/fonts/SourceSans3-VariableFont_wght.ttf");
+    font-optical-sizing: auto;
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --border: 0.4rem solid red;
+    --font-lg: 3rem;
+    --font-md: 1.5rem;
+    --spacing: 0.2rem;
+}
+
+button {
+    background-color: inherit;
+    border: 0;
+}
+
+button:hover {
+    cursor: pointer;
+    background-color: rgb(255, 255, 255, 75%);
+}
+
+/* ---- SPECIFIC STYLE ---- */
+body {
+    background-color: black;
+    color: white;
+
+    font-family: "Source Sans 3";
+    font-size: var(--font-md);
+
+    margin: 0;
+    height: 100vh;
+
+    border: var(--border);
+
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    text-align: center;
+    font-size: var(--font-lg);
+}
+
+hr {
+    border: var(--border);
+    border-width: 0.2rem;
+    margin: 0;
+}
+
+main {
+    height: 100%;
+    display: flex;
+}
