@@ -38,14 +38,14 @@ uv sync
 #### Install vendor dependencies
 Since yt-dlp depends on deno and ffmpeg, to get them, run the download script:
 ```
-uv run python download-vendor.py
+uv run download-vendor.py
 ```
 
 Append `--help` to above command to get list of options.
 
 #### Run this software
 ```
-uv run python main.py
+uv run main.py
 ```
 
 Go to your web browser and open http://127.0.0.1:5000.
@@ -55,7 +55,7 @@ Now you're good to go!
 ## Build this software
 To build this software, run:
 ```
-uv run python build.py
+uv run build.py
 ```
 on Linux or Windows to get binary for respective platform.
 

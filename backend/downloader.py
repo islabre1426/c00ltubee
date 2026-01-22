@@ -54,16 +54,20 @@ def process_settings():
     return result
 
 
-def get_video_info(urls: list[str], results_list: list[dict]):
+def get_video_info(urls: list[str]):
+    results = []
+
     with YoutubeDL(YDL_OPTS) as ydl:
         for url in urls:
             info = ydl.extract_info(url, download = False)
             info = ydl.sanitize_info(info)
 
-            results_list.append({
+            results.append({
                 'id': info['id'],
                 'title': info['title'],
             })
+    
+    return results
 
 
 def start_download(urls: list[str], additional_opts: dict):
