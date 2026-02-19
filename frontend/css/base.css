@@ -20,7 +20,7 @@
     --space-size: 0.4rem;
 }
 
-button, textarea {
+button, input[type="text"] {
     background-color: inherit;
     color: inherit;
     font-family: inherit;

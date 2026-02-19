@@ -20,20 +20,38 @@ main > div.active {
 }
 
 /* -- Home -- */
-.home hr {
+.home {
     width: 100%;
+
+    justify-content: center;
+}
+
+#links-input {
+    width: 100%;
+    height: calc(var(--font-lg) * 1.25);
+    font-size: var(--font-md);
+    display: flex;
+    padding: 0 calc(var(--space-size) * 2);
 }
 
 #youtube-links {
-    height: 100%;
-    width: 100%;
-
-    font-size: var(--font-md);
+    width: 87.5%;
 
     outline: none;
     resize: none;
 
     padding: var(--space-size);
+
+    border: var(--border);
+}
+
+#links-submit {
+    border: var(--border);
+}
+
+#links-input hr {
+    border: 0;
+    margin: var(--space-size);
 }
 
 /* -- Download list -- */

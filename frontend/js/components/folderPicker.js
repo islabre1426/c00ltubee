@@ -33,8 +33,8 @@ export function handleFolderPicker() {
 
             const result = chooseFolder.result;
 
-            // Empty string or "." means cancelled
-            if (result !== "" && result !== ".") {
+            // result not exists = cancelled
+            if (!result) {
                 path.textContent = result;
                 await backend.saveSetting({ [setting]: result });
             }

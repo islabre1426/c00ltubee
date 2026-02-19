@@ -2,15 +2,12 @@ import webview
 
 from pathlib import Path
 
-from backend.api import API
+from backend.app import app
 
 def main():
-    api = API()
-
     webview.create_window(
         title = 'c00ltubee',
-        url = str(Path(Path(__file__).parent, 'frontend', 'index.html')),
-        js_api = api,
+        url = app,
         width = 1280,
         height = 720,
     )
