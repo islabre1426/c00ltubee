@@ -54,7 +54,7 @@ def process_settings():
     return result
 
 
-def get_video_info(urls: list[str]):
+def get_video_info(urls: list[str]) -> list[dict]:
     results = []
 
     with YoutubeDL(YDL_OPTS) as ydl:

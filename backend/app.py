@@ -7,18 +7,21 @@ from flask import Flask, Response, stream_with_context, send_from_directory, jso
 
 from . import downloader, config, util
 
+
+frontend_folder = Path(config.ROOT_DIR, 'frontend')
+
 event_queue = Queue()
 
 app = Flask(
     import_name = __name__,
-    static_folder = Path(config.ROOT_DIR, 'frontend'),
+    static_folder = frontend_folder,
     static_url_path = '/',
 )
 
 
 @app.get('/')
 def index():
-    return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory(frontend_folder, 'index.html')
 
 
 @app.get('/load-settings')
@@ -71,9 +74,8 @@ def start_download_route():
 @app.post('/get-video-info')
 def get_video_info():
     urls = request.json
-    results = []
 
-    downloader.get_video_info(urls, results)
+    results = downloader.get_video_info(urls)
 
     return jsonify({
         'status': 'ok',
@@ -98,6 +100,7 @@ def download_events():
         stream_with_context(event_stream()),
         headers = headers,
     )
+
 
 @app.get('/browse-folder')
 def browse_folder():

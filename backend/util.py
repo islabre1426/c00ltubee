@@ -1,3 +1,5 @@
+import webview
+
 import tkinter
 from tkinter import filedialog
 from pathlib import Path
@@ -5,7 +7,27 @@ import ctypes
 
 from . import config
 
-def browse_folder() -> str:
+
+def browse_folder() -> str | None:
+    current_window = webview.active_window()
+
+    # The app is running via Pywebview
+    if current_window:
+        # See https://pywebview.flowrl.com/api/#window-create-file-dialog for documentation
+        chosen_folder = current_window.create_file_dialog(webview.FileDialog.FOLDER)
+
+        if chosen_folder:
+            return chosen_folder[0]
+
+        return None
+
+    # The app is running under a normal browser
+    chosen_folder = browse_folder_fallback()
+
+    return chosen_folder
+
+
+def browse_folder_fallback() -> str | None:
     # Create an empty window for folder picker.
     # This is useful for working around the web browser not having native folder picker.
     # Also set DPI Awareness to avoid blurry UI.
@@ -28,7 +50,10 @@ def browse_folder() -> str:
     hidden_tk.attributes('-topmost', False)
     hidden_tk.destroy()
 
-    # Properly format path for respective platform
-    chosen_folder = str(Path(chosen_folder))
+    if chosen_folder != "":
+        # Properly format path for respective platform
+        chosen_folder = str(Path(chosen_folder))
 
-    return chosen_folder
+        return chosen_folder
+
+    return None
