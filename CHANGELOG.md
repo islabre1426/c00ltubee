@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Overview image of this project architecture.
 - Option to choose downloaded file location (default to ~/Downloads).
 - Theme (bluudud and pr3typrincess).
+- Pywebview as native desktop app wrapper.
+- User config file now saved to common application data folder (e.g. `%LOCALAPPDATA%/c00ltubee` for Windows).
 
 ### Changed
 

@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import json
 
@@ -37,7 +38,9 @@ DOWNLOADER_SETTINGS = {
 
 ROOT_DIR = Path(__file__).parent.parent.resolve()
 VENDOR_DIR = Path(ROOT_DIR, 'vendor')
-USER_CONFIG_FILE = Path(ROOT_DIR, 'config.json')
+
+# TODO: Support other OSes later
+USER_CONFIG_FILE = Path(os.environ['LOCALAPPDATA'], 'c00ltubee', 'config.json')
 
 
 def load_user_setting() -> dict | None:
@@ -56,6 +59,9 @@ def load_user_setting() -> dict | None:
 
 def save_user_setting(setting: dict) -> None:
     def save_json(file: Path, obj: dict) -> None:
+        # Make sure the parents folder exist
+        file.parent.mkdir(parents = True, exist_ok = True)
+
         with file.open('w') as f:
             f.write(json.dumps(obj, indent = 4))
             return None
