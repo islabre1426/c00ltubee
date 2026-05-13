@@ -5,6 +5,3 @@ default: dev
 
 dev:
 	uv run "{{main_file}}"
-
-design:
-	uv run pyside6-designer

@@ -1,27 +1,30 @@
-from PySide6.QtCore import QFile, QIODevice
-from PySide6.QtUiTools import QUiLoader
+from PySide6.QtCore import QUrl
+from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QApplication
 
 from pathlib import Path
 import sys
 
 
-if __name__ == '__main__':
-	app = QApplication(sys.argv)
+ROOT_DIR = Path(__file__).parent
 
-	ui_file_name = Path(Path(__file__).parent, 'ui', 'mainwindow.ui')
-	ui_file = QFile(ui_file_name)
 
-	if not ui_file.open(QIODevice.OpenModeFlag.ReadOnly):
-		raise RuntimeError(f'Cannot open {ui_file_name}: {ui_file.errorString()}')
+def main(args: list[str]):
+	app = QApplication(args)
 
-	loader = QUiLoader()
-	window = loader.load(ui_file)
-	ui_file.close()
+	ui_file = Path(ROOT_DIR, 'ui', 'index.html')
 
-	if not window:
-		raise RuntimeError(loader.errorString())
+	view = QWebEngineView()
+	view.setWindowTitle('c00ltubee')
+	view.setMinimumSize(800, 600)
+	view.resize(800, 600)
 
-	window.show()
+	view.load(QUrl.fromLocalFile(ui_file))
+
+	view.show()
 
 	sys.exit(app.exec())
+
+
+if __name__ == '__main__':
+	main(sys.argv)
