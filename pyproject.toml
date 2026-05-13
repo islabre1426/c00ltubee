@@ -1,7 +1,7 @@
 [project]
 name = "c00ltubee"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Youtube video downloader with c00lgui appearance"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = []
