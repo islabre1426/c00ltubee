@@ -4,4 +4,4 @@ main_file := join(just_dir, 'src', 'main.py')
 default: dev
 
 dev:
-	uv run "{{main_file}}"
+	uv run "{{main_file}}" --webEngineArgs --remote-debugging-port=7893
