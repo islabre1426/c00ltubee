@@ -22,11 +22,6 @@ Change directory to the project:
 cd c00ltubee
 ```
 
-Note that for now you need to checkout to rework branch as this project is currently reworking:
-```bash
-git checkout rework
-```
-
 Finally, run this project:
 ```bash
 just

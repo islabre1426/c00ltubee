@@ -1,6 +1,4 @@
-from PySide6.QtCore import QUrl
-from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtWidgets import QApplication
+import webview
 
 from pathlib import Path
 import sys
@@ -10,21 +8,25 @@ ROOT_DIR = Path(__file__).parent
 
 
 def main(args: list[str]):
-	app = QApplication(args)
+    debug_flag = False
 
-	ui_file = Path(ROOT_DIR, 'ui', 'index.html')
+    if 'debug' in args:
+        debug_flag = True
 
-	view = QWebEngineView()
-	view.setWindowTitle('c00ltubee')
-	view.setMinimumSize(800, 600)
-	view.resize(800, 600)
+    ui_file = Path(ROOT_DIR, 'ui', 'index.html')
 
-	view.load(QUrl.fromLocalFile(ui_file))
+    webview.create_window(
+        title = 'c00ltubee',
+        url = str(ui_file),
+        min_size = (800, 600),
+        width = 800,
+        height = 600,
+    )
 
-	view.show()
-
-	sys.exit(app.exec())
+    webview.start(
+        debug = debug_flag,
+    )
 
 
 if __name__ == '__main__':
-	main(sys.argv)
+    main(sys.argv)
