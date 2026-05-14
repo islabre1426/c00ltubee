@@ -78,6 +78,7 @@ hr.vr {
 
 #sidebar-main {
     display: none;
+    width: 100%;
 }
 
 #sidebar-button {

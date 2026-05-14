@@ -3,6 +3,8 @@ import webview
 from pathlib import Path
 import sys
 
+from api import API
+
 
 ROOT_DIR = Path(__file__).parent
 
@@ -14,6 +16,7 @@ def main(args: list[str]):
         debug_flag = True
 
     ui_file = Path(ROOT_DIR, 'ui', 'index.html')
+    api = API()
 
     webview.create_window(
         title = 'c00ltubee',
@@ -21,6 +24,7 @@ def main(args: list[str]):
         min_size = (800, 600),
         width = 800,
         height = 600,
+        js_api = api,
     )
 
     webview.start(
