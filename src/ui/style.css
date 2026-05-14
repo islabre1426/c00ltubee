@@ -11,6 +11,8 @@
     --border-width: 0.3rem;
     --border: var(--border-width) solid red;
     --font-lg: 2rem;
+    --font-md: 1.5rem;
+    --font-sm: 1rem;
 }
 
 button {
@@ -71,11 +73,48 @@ hr.vr {
     height: 100%;
 }
 
-#content main {
+#content-main {
+    display: flex;
+    flex-direction: column;
+
     height: 100%;
 }
 
-#content footer {
+#content-main main {
+    height: 100%;
+
+    font-size: var(--font-md);
+}
+
+.download-card {
+    display: flex;
+
+    border-bottom: var(--border);
+}
+
+.download-card .info {
+    padding: 0.25rem;
+    width: 75%;
+}
+
+.download-card .status {
+    font-size: var(--font-sm);
+}
+
+.download-card .operation {
+    width: 25%;
+
+    display: flex;
+    justify-content: flex-end;
+}
+
+.download-card .operation button {
+    height: 100%;
+
+    border-left: var(--border);
+}
+
+#content-main footer {
     border-top: var(--border);
 }
 

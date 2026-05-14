@@ -44,6 +44,23 @@ function main() {
         `;
     }
 
+    function createDownloadCard(title, id) {
+        const container = document.createElement('div');
+        container.classList.add('download-card');
+        container.dataset.id = id;
+
+        container.innerHTML = `
+        <div class="info">
+            <div class="title">${title}</div>
+            <div class="status"></div>
+        </div>
+        <div class="operation">
+            <button class="card-cancel">Cancel</button>
+            <button class="card-view">&gt;</button>
+        </div>
+        `;
+    }
+
     function toggleSidebar(state) {
         isSidebarExtended = state;
         const newWidth = Math.floor(window.innerWidth * 0.5);
