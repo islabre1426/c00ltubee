@@ -47,7 +47,7 @@ function main() {
     function createDownloadCard(title, id) {
         const container = document.createElement('div');
         container.classList.add('download-card');
-        container.dataset.id = id;
+        container.dataset.cardId = id;
 
         container.innerHTML = `
         <div class="info">
