@@ -56,5 +56,5 @@ function renderAddUrlsUI() {
     </footer>
     `;
 
-    document.getElementById('inject-button').addEventListener('click', handleDownload);
+    // document.getElementById('inject-button').addEventListener('click', handleDownload);
 }

@@ -3,22 +3,22 @@ from pathlib import Path
 
 from bottle import Bottle, static_file, request, response
 
-from windowhandler import handle_sidebar
+from backend.windowhandler import handle_sidebar
 
 
 app = Bottle()
 
-static_folder = Path(Path(__file__).parent, 'ui')
+_static_folder = Path(Path(__file__).parent, 'frontend')
 
 
 @app.get('/')
 def index():
-    return static_file('index.html', root = static_folder)
+    return static_file('index.html', root = _static_folder)
 
 
 @app.get('/<filepath:path>')
 def static_files(filepath):
-    return static_file(filepath, root = static_folder)
+    return static_file(filepath, root = _static_folder)
 
 
 @app.post('/extend-sidebar')

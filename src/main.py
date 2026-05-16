@@ -1,12 +1,8 @@
 import webview
 
-from pathlib import Path
 import sys
 
 from app import app
-
-
-ROOT_DIR = Path(__file__).parent
 
 
 def main(args: list[str]):
