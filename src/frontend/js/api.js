@@ -1,6 +1,9 @@
 export function attachApi() {
     return {
         extendSidebar: async (extend) => await fetchJson('/extend-sidebar', 'POST', { extend: extend }),
+        startDownload: async (url) => await fetchJson('/start-download', 'POST', { url: url }),
+        startWorker: async () => await fetchJson('/start-worker'),
+        getDownloadStatus: async (id) => await fetchJson('/status', 'POST', { id: id }),
     }
 }
 
@@ -23,4 +26,13 @@ async function fetchJson(url, method = 'GET', body = null) {
     } catch (err) {
         throw err;
     }
+}
+
+export function checkSuccess(message) {
+    if (message.status === 'error') {
+        console.error(`Error: ${message.content}`);
+        return false;
+    }
+
+    return true;
 }

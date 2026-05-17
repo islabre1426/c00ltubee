@@ -53,6 +53,7 @@ def save_config_file(opts: dict):
     config = load_config_file()
 
     if config is None:
+        _config_file.mkdir(parents = True)
         save_json(_config_file, opts)
     
     config.update(opts)

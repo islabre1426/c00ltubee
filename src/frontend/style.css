@@ -101,17 +101,22 @@ hr.vr {
     font-size: var(--font-sm);
 }
 
-.download-card .operation {
+.download-card .operations {
     width: 25%;
 
     display: flex;
     justify-content: flex-end;
+    align-items: center;
 }
 
-.download-card .operation button {
+.download-card .operations button {
     height: 100%;
 
     border-left: var(--border);
+}
+
+.download-card .operations span {
+    padding-right: 0.25rem;
 }
 
 #content-main footer {
