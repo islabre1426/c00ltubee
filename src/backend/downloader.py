@@ -59,10 +59,10 @@ def _download_video(opts: dict, task_id: str, url: str):
 
 def start_worker():
     while True:
-        task = queue.get()
-
-        if task is None:
+        if queue.empty():
             break
+
+        task = queue.get()
 
         task_id, url = task
 

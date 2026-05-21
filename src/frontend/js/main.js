@@ -12,11 +12,11 @@ const pollers = {};
 
 sidebarButton.addEventListener('click', () => toggleSidebar(!isSidebarExtended));
 
-addUrlsButton.addEventListener('click', () => {
+addUrlsButton.addEventListener('click', async () => {
     const currentContent = sidebarMain.dataset.contentType;
 
     if (isSidebarExtended && currentContent === 'add-urls') {
-        toggleSidebar(false);
+        await toggleSidebar(false);
         return;
     }
 
@@ -24,7 +24,7 @@ addUrlsButton.addEventListener('click', () => {
         renderAddUrlsUI();
     }
 
-    toggleSidebar(true);
+    await toggleSidebar(true);
 });
 
 
@@ -58,12 +58,23 @@ function renderAddUrlsUI() {
     </footer>
     `;
 
-    document.getElementById('inject-button').addEventListener('click', handleDownload);
+    document.getElementById('inject-button').addEventListener('click', async () => await handleDownload());
 }
 
 async function handleDownload() {
     const urlsElement = document.getElementById('urls');
-    const urls = urlsElement.value.trim().split('\n');
+    const injectButton = document.getElementById('inject-button');
+
+    handleUI(true);
+
+    // Check for empty input before splitting
+    const input = urlsElement.value.trim();
+    if (!input) {
+        handleUI(false);
+        return;
+    };
+
+    const urls = input.split('\n');
 
     let status;
 
@@ -78,6 +89,20 @@ async function handleDownload() {
     }
 
     await api.startWorker();
+
+    // Clear urls input after starting
+    handleUI(false);
+    urlsElement.value = '';
+
+
+
+    function handleUI(disabled) {
+        urlsElement.disabled = disabled;
+        urlsElement.style.cursor = disabled ? 'not-allowed' : 'auto';
+
+        injectButton.disabled = disabled;
+        injectButton.style.cursor = disabled ? 'not-allowed' : 'pointer';
+    }
 }
 
 function startStatusPolling(taskId) {
@@ -87,7 +112,7 @@ function startStatusPolling(taskId) {
         const status = await api.getDownloadStatus(taskId);
         const info = status['info'];
 
-        if (!checkSuccess(status) || info['status'] === 'finished') {
+        if (!checkSuccess(status) || info['status'] === 'finished' || info['status'] === 'error') {
             stopStatusPolling(taskId);
         }
 
