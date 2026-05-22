@@ -10,7 +10,6 @@ export function createDownloadCard(taskId) {
     </div>
     <div class="operations">
         <span class="card-percent">0%</span>
-        <button class="card-cancel">Cancel</button>
         <button class="card-view">&gt;</button>
     </div>
     `;
@@ -26,7 +25,6 @@ export function updateDownloadCard(taskId, info) {
     const titleElement = card.querySelector('.title');
     const statusElement = card.querySelector('.status');
     const percentElement = card.querySelector('.card-percent');
-    const cancelElement = card.querySelector('.card-cancel');
 
     let statusText = 'Status: ';
 
@@ -45,13 +43,11 @@ export function updateDownloadCard(taskId, info) {
         case 'finished':
             statusText += 'Success';
             percentElement.textContent = '100%';
-            cancelElement.style.display = 'none';
             break;
 
         case 'error':
             statusText += 'Failed';
             percentElement.textContent = '0%';
-            cancelElement.style.display = 'none';
             break;
         
         case 'queued':

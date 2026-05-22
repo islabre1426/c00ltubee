@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from uuid import uuid4
 
-from bottle import Bottle, static_file, request
+from bottle import Bottle, static_file, request, abort, HTTPResponse
 
 from backend import downloader, windowhandler
 
@@ -27,16 +27,15 @@ def extend_sidebar():
     extend_flag = request.json['extend']
 
     if extend_flag is None:
-        return json.dumps({
-            'status': 'error',
-            'content': 'Extend property does not exist',
-        })
+        abort(404, 'extend not found')
     
     windowhandler.handle_sidebar(extend_flag)
 
-    return json.dumps({
-        'status': 'ok'
-    })
+    response = {
+        'status': 'success',
+    }
+
+    return HTTPResponse(status = 200, body = json.dumps(response))
 
 
 @app.post('/start-download')
@@ -44,10 +43,7 @@ def start_download():
     url = request.json['url']
 
     if url is None:
-        return json.dumps({
-            'status': 'error',
-            'content': 'Urls property does not exist',
-        })
+        abort(404, 'urls not found')
     
     # Assign tasks before the UI starts polling
     task_id = str(uuid4())
@@ -59,19 +55,23 @@ def start_download():
         'status': 'queued',
     }
 
-    return json.dumps({
-        'status': 'ok',
-        'task_id': task_id,
-    })
+    response = {
+        'status': 'success',
+        'taskId': task_id,
+    }
+
+    return HTTPResponse(status = 200, body = json.dumps(response))
 
 
 @app.get('/start-worker')
 def start_worker_index():
     downloader.start_worker()
 
-    return json.dumps({
-        'status': 'ok',
-    })
+    response = {
+        'status': 'success',
+    }
+
+    return HTTPResponse(status = 200, body = json.dumps(response))
 
 
 @app.post('/status')
@@ -79,14 +79,13 @@ def get_download_status():
     task_id = request.json['id']
 
     if task_id is None:
-        return json.dumps({
-            'status': 'error',
-            'content': 'Id property does not exist',
-        })
+        abort(404, 'id not found')
     
     info = downloader.downloading_tasks[task_id]
 
-    return json.dumps({
-        'status': 'ok',
+    response = {
+        'status': 'success',
         'info': info,
-    })
+    }
+
+    return HTTPResponse(status = 200, body = json.dumps(response))

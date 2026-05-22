@@ -18,7 +18,7 @@ async function fetchJson(url, method = 'GET', body = null) {
         })
 
         if (!response.ok) {
-            throw new Error(`Request to ${url} returned status: ${response.status}`);
+            throw new Error(`${method} ${url} status ${response.status} with message: ${response.statusText}`);
         }
 
         const result = await response.json();
@@ -26,13 +26,4 @@ async function fetchJson(url, method = 'GET', body = null) {
     } catch (err) {
         throw err;
     }
-}
-
-export function checkSuccess(message) {
-    if (message.status === 'error') {
-        console.error(`Error: ${message.content}`);
-        return false;
-    }
-
-    return true;
 }
