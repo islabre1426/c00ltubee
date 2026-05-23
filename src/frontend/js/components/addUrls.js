@@ -43,7 +43,7 @@ async function handleDownload() {
 
         createDownloadCard(taskId);
 
-        state.pollers[taskId] = startStatusPolling(taskId);
+        state.pollers[taskId] = await startStatusPolling(taskId);
     }
 
     await api.startWorker();
