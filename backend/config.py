@@ -6,8 +6,7 @@ from pathlib import Path
 from backend.util import get_root_dir
 
 
-_root_dir = get_root_dir()
-
+_vendor_dir = Path(get_root_dir(), '..', 'vendor')
 
 _downloader_opts = {
     'paths': {
@@ -18,10 +17,10 @@ _downloader_opts = {
     },
     'noplaylist': True,
     'color': 'never',
-    'ffmpeg_location': str(Path(_root_dir, 'vendor', 'ffmpeg', 'bin')),
+    'ffmpeg_location': str(Path(_vendor_dir, 'ffmpeg', 'bin')),
     'js_runtimes': {
         'quickjs': {
-            'path': str(Path(_root_dir, 'vendor', 'quickjs', 'qjs.exe')),
+            'path': str(Path(_vendor_dir, 'quickjs', 'qjs.exe')),
         }
     },
     'format': 'bestvideo+bestaudio/best',
@@ -34,6 +33,7 @@ _appearance_opts = {
     'background': 'black',
     'app_title': 'c00ltubee',
 }
+
 
 def _get_config_location() -> Path:
     match sys.platform:
