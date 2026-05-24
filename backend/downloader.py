@@ -3,7 +3,7 @@ import threading
 
 from yt_dlp import YoutubeDL
 
-from .config import process_downloader_opts
+from backend.config import process_downloader_opts
 
 
 queue = Queue()
@@ -18,7 +18,7 @@ def _create_hook(task_id: str):
             case 'downloading':
                 # Safely calculate percentage
                 total = d.get('total_bytes') or d.get('total_bytes_estimate') or 0
-                downloaded_bytes = d.get('downloaded_bytes')
+                downloaded_bytes = d.get('downloaded_bytes', 0)
                 percentage = (downloaded_bytes / total * 100) if total > 0 else 0
 
                 downloading_tasks[task_id].update({

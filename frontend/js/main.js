@@ -1,6 +1,5 @@
 import { attachApi } from "./api.js";
 import { handleAddUrlsButton } from "./components/addUrls.js";
-import { createDownloadCard, updateDownloadCard } from "./components/downloadCard.js";
 import { toggleSidebar } from "./components/sidebar.js";
 
 export const api = attachApi();

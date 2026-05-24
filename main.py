@@ -2,7 +2,7 @@ import webview
 
 import sys
 
-from app import app
+from backend.app import app
 
 
 def main(args: list[str]):

@@ -9,7 +9,7 @@ from backend import downloader, windowhandler
 
 app = Bottle()
 
-_static_folder = Path(Path(__file__).parent, 'frontend')
+_static_folder = Path(Path(__file__).parent, '..', 'frontend')
 
 
 @app.get('/')

@@ -1,5 +1,5 @@
 just_dir := justfile_directory()
-main_file := join(just_dir, 'src', 'main.py')
+main_file := join(just_dir, 'main.py')
 
 default: dev
 

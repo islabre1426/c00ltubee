@@ -18,7 +18,7 @@ export function createDownloadCard(taskId) {
 }
 
 export function updateDownloadCard(taskId, info) {
-    const card = document.querySelector(`[data-task-id="${taskId}"]`);
+    const card = document.querySelector(`.download-card[data-task-id="${taskId}"]`);
 
     if (!card) return;
 
@@ -59,3 +59,23 @@ export function updateDownloadCard(taskId, info) {
 
     statusElement.textContent = statusText;
 }
+
+// function renderCardInfo(taskId) {
+//     const sidebarMain = document.getElementById('sidebar-main');
+
+//     sidebarMain.dataset.contentType = 'card-info';
+//     sidebarMain.dataset.taskId = taskId;
+//     sidebarMain.classList.add('card-info-container');
+
+//     sidebarMain.innerHTML = `
+//     <header>
+//         <span class="title">Add URLs to Download</span>
+//     </header>
+//     <main>
+//         <textarea id="urls"></textarea>
+//     </main>
+//     <footer>
+//         <button id="inject-button">Inject!!</button>
+//     </footer>
+//     `;
+// }

@@ -1,8 +1,9 @@
+import sys
 import json
 import os
 from pathlib import Path
 
-from util import get_root_dir
+from backend.util import get_root_dir
 
 
 _root_dir = get_root_dir()
@@ -34,7 +35,19 @@ _appearance_opts = {
     'app_title': 'c00ltubee',
 }
 
-_config_file = Path(os.environ['LOCALAPPDATA'], 'c00ltubee', 'config.json')
+def _get_config_location() -> Path:
+    match sys.platform:
+        case 'win32':
+            return Path(os.environ['LOCALAPPDATA'], 'c00ltubee', 'config.json')
+
+        case 'linux':
+            return Path(Path.home(), '.config', 'c00ltubee', 'config.json')
+
+        case _:
+            raise RuntimeError(f'Unsupported platform: {sys.platform}')
+
+
+_config_file = _get_config_location()
 
 
 def load_config_file() -> dict | None:
@@ -55,6 +68,7 @@ def save_config_file(opts: dict):
     if config is None:
         _config_file.mkdir(parents = True)
         save_json(_config_file, opts)
+        return
     
     config.update(opts)
 
@@ -86,7 +100,7 @@ def process_downloader_opts():
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': preferred_audio_format,
             }],
-        })
+        })  # ty:ignore[no-matching-overload]
 
         opts.pop('merge_output_format')
     
