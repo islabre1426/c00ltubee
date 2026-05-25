@@ -1,3 +1,5 @@
+import stat
+import sys
 import tarfile
 from typing import Literal
 from dataclasses import dataclass
@@ -57,7 +59,7 @@ quickjs_spec = VendorSpec(
 )
 
 specs = [
-    # ffmpeg_spec,
+    ffmpeg_spec,
     quickjs_spec,
 ]
 
@@ -123,7 +125,28 @@ def extract_file(archive_file: Path, dest_dir: Path):
 
     if archive_file_name.endswith('.zip'):
         with zipfile.ZipFile(archive_file) as archive:
-            archive.extractall(dest_dir)
+            for info in archive.infolist():
+                archive.extract(info, dest_dir)
+
+                extracted_path = Path(dest_dir, info.filename)
+
+                if not extracted_path.exists():
+                    continue
+
+                if sys.platform == 'linux':
+                    # Extract high 16 bits (Unix file mode)
+                    mode = info.external_attr >> 16
+
+                    if mode:
+                        # For directories, ensure execute permission for traversal
+                        if stat.S_ISDIR(extracted_path.stat().st_mode):
+                            mode |= 0o111 # Add execute for user/group/others
+
+                        print(f'Copying permission {mode} for {extracted_path}...')
+
+                        extracted_path.chmod(mode & 0o777) # Mask to 777 to avoid extra bits
+
+                        print(f'{extracted_path} permission preserved.')
 
     elif archive_file_name.endswith('.tar.xz'):
         with tarfile.open(archive_file, 'r:xz') as archive:

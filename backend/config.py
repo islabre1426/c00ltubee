@@ -7,6 +7,8 @@ from backend.util import get_root_dir
 
 
 _vendor_dir = Path(get_root_dir(), '..', 'vendor')
+_current_os = sys.platform
+_qjs_exe = 'qjs.exe' if _current_os == 'win32' else 'qjs'
 
 _downloader_opts = {
     'paths': {
@@ -17,10 +19,10 @@ _downloader_opts = {
     },
     'noplaylist': True,
     'color': 'never',
-    'ffmpeg_location': str(Path(_vendor_dir, 'ffmpeg', 'bin')),
+    'ffmpeg_location': str(Path(_vendor_dir, 'ffmpeg', _current_os, 'bin')),
     'js_runtimes': {
         'quickjs': {
-            'path': str(Path(_vendor_dir, 'quickjs', 'qjs.exe')),
+            'path': str(Path(_vendor_dir, 'quickjs', _current_os, _qjs_exe)),
         }
     },
     'format': 'bestvideo+bestaudio/best',
