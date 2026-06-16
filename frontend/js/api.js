@@ -1,5 +1,6 @@
 export function attachApi() {
     return {
+        getHistory: async () => await fetchJson('/history'),
         extendSidebar: async (extend) => await fetchJson('/extend-sidebar', 'POST', { extend: extend }),
         startDownload: async (url) => await fetchJson('/start-download', 'POST', { url: url }),
         startWorker: async () => await fetchJson('/start-worker'),

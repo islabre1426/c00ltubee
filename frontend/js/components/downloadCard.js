@@ -1,11 +1,11 @@
-export function createDownloadCard(taskId) {
+export function createDownloadCard(taskId, title = null) {
     const container = document.createElement('div');
     container.classList.add('download-card');
     container.dataset.taskId = taskId;
 
     container.innerHTML = `
     <div class="info">
-        <div class="title">Waiting...</div>
+        <div class="title">${title ? title : 'Waiting...'}</div>
         <div class="status"></div>
     </div>
     <div class="operations">
@@ -14,7 +14,7 @@ export function createDownloadCard(taskId) {
     </div>
     `;
 
-    document.querySelector('#content-main main').appendChild(container);
+    document.querySelector('#content-main main').prepend(container);
 }
 
 export function updateDownloadCard(taskId, info) {
