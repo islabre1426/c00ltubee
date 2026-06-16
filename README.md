@@ -30,6 +30,11 @@ Change directory to the project:
 cd c00ltubee
 ```
 
+Install `yt-dlp` recommended dependencies:
+```bash
+uv run vendor.py
+```
+
 Finally, run this project:
 ```bash
 just
