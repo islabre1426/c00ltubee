@@ -1,4 +1,4 @@
-from database.connector import get_connection
+from database.connector import DBConnector
 
 
 class DownloadHistory:
@@ -12,6 +12,7 @@ class DownloadHistory:
 
     def __init__(self):
         self.name = 'download_history'
+        self.db_connector = DBConnector()
 
 
     def add(
@@ -21,23 +22,21 @@ class DownloadHistory:
         status_type: str,
         log_file_path: str = None,
     ):
-        with get_connection() as conn:
-            conn.execute(
+        with self.db_connector as db:
+            db.cursor.execute(
                 f'INSERT INTO {self.name} (task_id, title, status_type, log_file_path) VALUES (?, ?, ?, ?)',
                 (task_id, title, status_type, log_file_path),
             )
     
 
     def get_by_id(self, task_id: str):
-        with get_connection() as conn:
-            cursor = conn.cursor()
-
-            cursor.execute(
+        with self.db_connector as db:
+            db.cursor.execute(
                 f'SELECT * FROM {self.name} WHERE task_id = ?',
                 (task_id,),
             )
 
-            result = cursor.fetchone()
+            result = db.cursor.fetchone()
 
             if result is None:
                 raise ValueError('Task not found:', task_id)
@@ -46,16 +45,14 @@ class DownloadHistory:
     
 
     def get_all_in_dict(self):
-        with get_connection() as conn:
-            cursor = conn.cursor()
-
-            cursor.execute(
+        with self.db_connector as db:
+            db.cursor.execute(
                 f'SELECT * FROM {self.name}'
             )
 
             result: list[dict] = []
 
-            for entry in cursor.fetchall():
+            for entry in db.cursor.fetchall():
                 result.append({
                     'task_id': entry[0],
                     'title': entry[1],
@@ -73,8 +70,8 @@ class DownloadHistory:
         status_type: str,
         log_file_path: str = None
     ):
-        with get_connection() as conn:
-            conn.execute(
+        with self.db_connector as db:
+            db.cursor.execute(
                 f'UPDATE {self.name} SET title = ?, status_type = ?, log_file_path = ? WHERE task_id = ?',
                 (title, status_type, log_file_path, task_id),
             )
@@ -85,23 +82,23 @@ class DownloadHistory:
         task_id: str,
         status_type: str,
     ):
-        with get_connection() as conn:
-            conn.execute(
+        with self.db_connector as db:
+            db.cursor.execute(
                 f'UPDATE {self.name} SET status_type = ? WHERE task_id = ?',
                 (status_type, task_id),
             )
     
 
     def delete_by_id(self, task_id: str):
-        with get_connection() as conn:
-            conn.execute(
+        with self.db_connector as db:
+            db.cursor.execute(
                 f'DELETE FROM {self.name} WHERE task_id = ?',
                 (task_id,),
             )
     
 
     def delete_all(self):
-        with get_connection() as conn:
-            conn.execute(
+        with self.db_connector as db:
+            db.cursor.execute(
                 f'DELETE FROM {self.name}'
             )

@@ -5,7 +5,7 @@ from uuid import uuid4
 from bottle import Bottle, static_file, request, abort, HTTPResponse
 
 from backend import downloader, windowhandler
-from database.connector import init
+from database.init import init
 from database.download_history import DownloadHistory
 
 
