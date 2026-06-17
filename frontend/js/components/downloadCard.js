@@ -43,6 +43,12 @@ export function updateDownloadCard(taskId, info) {
         case 'finished':
             statusText += 'Success';
             percentElement.textContent = '100%';
+
+            // Make sure title is updated even for already downloaded file
+            if (info['title']) {
+                titleElement.textContent = info['title'];
+            }
+
             break;
 
         case 'error':

@@ -55,6 +55,27 @@ def _on_task_error(task_id: str):
     })
 
 
+def _on_task_success(task_id: str, title: str = None):
+    if title:
+        _download_history_db.update_by_id(
+            task_id,
+            title,
+            'finished',
+        )
+
+    else:
+        _download_history_db.update_status_by_id(
+            task_id,
+            'finished',
+        )
+
+    _download_tasks[task_id].update({
+        'status': 'finished',
+        'title': title,
+        'progress': 100,
+    })
+
+
 def _create_hook(task_id: str):
     def _hooks(d: dict):
         status = d.get('status')
@@ -72,14 +93,7 @@ def _create_hook(task_id: str):
                 })
                 
             case 'finished':
-                _download_history_db.update_status_by_id(
-                    task_id, 'finished',
-                )
-
-                _download_tasks[task_id].update({
-                    'status': 'finished',
-                    'progress': 100,
-                })
+                _on_task_success(task_id)
             
             case 'error':
                 _on_task_error(task_id)
@@ -93,7 +107,14 @@ def _download_video(opts: dict, task_id: str, url: str):
         with YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download = False)
             info = ydl.sanitize_info(info)
+
             title = info.get('title')
+            
+            output_filename = Path(ydl.prepare_filename(info))
+
+            if output_filename.exists():
+                _on_task_success(task_id, title)
+                return
 
             _download_history_db.update_by_id(
                 task_id,
