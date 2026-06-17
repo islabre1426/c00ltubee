@@ -1,4 +1,4 @@
-CREATE TABLE task_status_type (
+CREATE TABLE history_status_type (
     type TEXT PRIMARY KEY UNIQUE NOT NULL
 );
 
@@ -9,6 +9,8 @@ CREATE TABLE download_history (
     log_file_path TEXT NULL DEFAULT NULL,
 
     PRIMARY KEY (task_id),
-    FOREIGN KEY (status_type) REFERENCES task_status_type (type),
+    FOREIGN KEY (status_type) REFERENCES history_status_type (type),
     UNIQUE (task_id)
 );
+
+INSERT INTO history_status_type (type) VALUES ('queued'), ('working'), ('finished'), ('error');

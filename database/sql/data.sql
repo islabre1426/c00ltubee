@@ -1,1 +1,0 @@
-INSERT INTO task_status_type (type) VALUES ('queued'), ('working'), ('finished'), ('error');

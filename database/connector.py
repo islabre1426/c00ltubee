@@ -1,24 +1,14 @@
 from pathlib import Path
 import sqlite3
 
-
-_root_path = Path(__file__).parent
+from util.util import get_app_data_location, get_root_dir
 
 
 class DBConnector:
-    # Singleton pattern to make sure only one instance is used
-    def __new__(cls):
-        if not hasattr(cls, 'inst'):
-            cls.inst = super().__new__(cls)
-        
-        return cls.inst
-    
+    def __init__(self, name: str):
+        self.db_path = Path(get_app_data_location(), 'db', f'{name}.sqlite')
 
-    def __init__(self):
-        self.db_path = Path(_root_path, 'db', 'app.sqlite')
-
-        if not self.db_path.parent.exists():
-            self.db_path.parent.mkdir(parents = True)
+        self.init()
     
 
     def __enter__(self):
@@ -42,13 +32,30 @@ class DBConnector:
         db_setup_sql = '''
         PRAGMA foreign_keys = 1;
         PRAGMA journal_mode = WAL;
+        PRAGMA busy_timeout = 5000;
         '''
 
         if self.connection:
             self.cursor.executescript(db_setup_sql)
+
+            # Make sure configuration is applied
+            self.connection.commit()
         else:
             raise RuntimeError('No database connection exist')
     
 
     def db_exists(self):
         return self.db_path.exists()
+    
+
+    def load_sql_file(self, name: str):
+        sql_file = Path(get_root_dir(), 'database', 'sql', f'{name}.sql')
+
+        with sql_file.open() as f:
+            sql = f.read()
+            self.cursor.executescript(sql)
+    
+
+    def init(self):
+        if not self.db_path.parent.exists():
+            self.db_path.parent.mkdir(parents = True)

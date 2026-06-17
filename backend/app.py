@@ -5,20 +5,16 @@ from uuid import uuid4
 from bottle import Bottle, static_file, request, abort, HTTPResponse
 
 from backend import downloader, windowhandler
-from database.init import init
-from database.download_history import DownloadHistory
+from database.download_history import download_history_db
 
 
 app = Bottle()
 
 _static_folder = Path(Path(__file__).parent, '..', 'frontend')
-_download_history_db = DownloadHistory()
 
 
 @app.get('/')
 def index():
-    init()
-
     return static_file('index.html', root = _static_folder)
 
 
@@ -29,14 +25,17 @@ def static_files(filepath):
 
 @app.get('/history')
 def history():
-    history = _download_history_db.get_all_in_dict()
+    try:
+        history = download_history_db.get_all_in_dict()
 
-    response = {
-        'status': 'success',
-        'history': history,
-    }
+        response = {
+            'status': 'success',
+            'history': history,
+        }
 
-    return HTTPResponse(status = 200, body = json.dumps(response))
+        return HTTPResponse(status = 200, body = json.dumps(response))
+    except:
+        abort(404, 'History not found')
 
 
 @app.post('/extend-sidebar')

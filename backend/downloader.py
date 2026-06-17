@@ -5,12 +5,11 @@ import threading
 
 from yt_dlp import YoutubeDL
 
-from backend.config import get_app_data_location, process_downloader_opts
-from database.download_history import DownloadHistory
+from backend.config import get_app_data_location, get_downloader_opts
+from database.download_history import download_history_db
 
 
 _queue = Queue()
-_download_history_db = DownloadHistory()
 _download_tasks = {}
 _app_data_location = get_app_data_location()
 
@@ -45,7 +44,7 @@ class Logger:
 
 
 def _on_task_error(task_id: str):
-    _download_history_db.update_status_by_id(
+    download_history_db.update_status_by_id(
         task_id, 'error',
     )
 
@@ -57,14 +56,14 @@ def _on_task_error(task_id: str):
 
 def _on_task_success(task_id: str, title: str = None):
     if title:
-        _download_history_db.update_by_id(
+        download_history_db.update_by_id(
             task_id,
             title,
             'finished',
         )
 
     else:
-        _download_history_db.update_status_by_id(
+        download_history_db.update_status_by_id(
             task_id,
             'finished',
         )
@@ -116,7 +115,7 @@ def _download_video(opts: dict, task_id: str, url: str):
                 _on_task_success(task_id, title)
                 return
 
-            _download_history_db.update_by_id(
+            download_history_db.update_by_id(
                 task_id,
                 title,
                 'working',
@@ -145,7 +144,7 @@ def start_worker():
         task_id, url = task
 
         ydl_opts = {
-            **process_downloader_opts(),
+            **get_downloader_opts(),
             'progress_hooks': [_create_hook(task_id)],
             'logger': Logger(task_id),
         }
@@ -161,7 +160,7 @@ def add_task_to_queue(task_id: str, url: str):
     task = (task_id, url)
     _queue.put(task)
 
-    _download_history_db.add(
+    download_history_db.add(
         task_id,
         'Waiting...',
         'queued',

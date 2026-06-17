@@ -1,18 +1,22 @@
 from database.connector import DBConnector
 
 
-class DownloadHistory:
-    # Singleton pattern to make sure only one instance is used
-    def __new__(cls):
-        if not hasattr(cls, 'inst'):
-            cls.inst = super().__new__(cls)
-        
-        return cls.inst
-    
-
+class _DownloadHistory:
     def __init__(self):
         self.name = 'download_history'
-        self.db_connector = DBConnector()
+        self.db_connector = DBConnector(self.name)
+
+        self.init()
+    
+
+    def init(self):
+        if not self.db_connector.db_exists():
+            print(f'{self.name} database does not exist. Initializing.')
+
+            with self.db_connector as db:
+                self.db_connector.load_sql_file(self.name)
+        else:
+            print(f'{self.name} database already exists. Skipping initialization.')
 
 
     def add(
@@ -102,3 +106,6 @@ class DownloadHistory:
             db.cursor.execute(
                 f'DELETE FROM {self.name}'
             )
+
+
+download_history_db = _DownloadHistory()
