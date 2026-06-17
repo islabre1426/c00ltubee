@@ -37,19 +37,19 @@ _appearance_opts = {
 }
 
 
-def _get_config_location() -> Path:
+def get_app_data_location() -> Path:
     match sys.platform:
         case 'win32':
-            return Path(os.environ['LOCALAPPDATA'], 'c00ltubee', 'config.json')
+            return Path(os.environ['LOCALAPPDATA'], 'c00ltubee')
 
         case 'linux':
-            return Path(Path.home(), '.config', 'c00ltubee', 'config.json')
+            return Path(Path.home(), '.local', 'share', 'c00ltubee')
 
         case _:
             raise RuntimeError(f'Unsupported platform: {sys.platform}')
 
 
-_config_file = _get_config_location()
+_config_file = Path(get_app_data_location(), 'config.json')
 
 
 def load_config_file() -> dict | None:

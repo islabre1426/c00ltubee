@@ -1,16 +1,47 @@
+from datetime import datetime
+from pathlib import Path
 from queue import Queue
 import threading
-from time import sleep
 
 from yt_dlp import YoutubeDL
 
-from backend.config import process_downloader_opts
+from backend.config import get_app_data_location, process_downloader_opts
 from database.download_history import DownloadHistory
 
 
 _queue = Queue()
 _download_history_db = DownloadHistory()
 _download_tasks = {}
+_app_data_location = get_app_data_location()
+
+
+class Logger:
+    def __init__(self, task_id: str):
+        today = datetime.now().strftime('%Y-%m-%d')
+
+        self.log_path = Path(_app_data_location, 'logs', today, f'{task_id}.log')
+    
+
+    def _write_log(self, msg: str):
+        log_path_parent = self.log_path.parent
+
+        if not log_path_parent.exists():
+            log_path_parent.mkdir(parents = True)
+        
+        with self.log_path.open('a') as f:
+            f.write(msg + '\n')
+    
+
+    def debug(self, msg: str):
+        self._write_log(msg)
+    
+
+    def warning(self, msg: str):
+        self._write_log(msg)
+
+    
+    def error(self, msg: str):
+        self._write_log(msg)
 
 
 def _on_task_error(task_id: str):
@@ -95,6 +126,7 @@ def start_worker():
         ydl_opts = {
             **process_downloader_opts(),
             'progress_hooks': [_create_hook(task_id)],
+            'logger': Logger(task_id),
         }
 
         threading.Thread(
