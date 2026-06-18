@@ -19,27 +19,14 @@ class _Setting:
                 db.load_sql_file(self.name)
 
                 # Download location is different for each OSes, hence it is inserted manually here
-                self._add(
-                    'download_location',
-                    'text',
-                    str(Path(Path.home(), 'Downloads')),
+                download_location = str(Path(Path.home(), 'Downloads'))
+
+                db.cursor.execute(
+                    f'INSERT INTO {self.name} (name, value_type, default_value) VALUES (?, ?, ?)',
+                    ('download_location', 'location_folder', download_location),
                 )
         else:
             print(f'{self.name} database already exists. Skipping initialization.')
-    
-
-    def _add(
-        self,
-        name: str,
-        value_type: str,
-        default_value: str,
-        user_value: str | None = None,
-    ):
-        with self.db_connector as db:
-            db.cursor.execute(
-                f'INSERT INTO {self.name} (name, value_type, default_value, user_value) VALUES (?, ?, ?, ?)',
-                (name, value_type, default_value, user_value),
-            )
     
 
     def get_by_name(self, name: str):
