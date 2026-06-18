@@ -14,7 +14,7 @@ export function createDownloadCard(taskId, title = null) {
     </div>
     `;
 
-    document.querySelector('.content-main[data-page="Home"]').prepend(container);
+    document.querySelector('.content-main[data-page="Home"] main').prepend(container);
 }
 
 export function updateDownloadCard(taskId, info) {

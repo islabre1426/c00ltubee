@@ -2,6 +2,7 @@ import { attachApi } from "./api.js";
 import { handleAddUrlsButton } from "./components/addUrls.js";
 import { populateHistory } from "./components/history.js";
 import { changePage } from "./components/navigation.js";
+import { createAllSettingCards } from "./components/settings.js";
 import { toggleSidebar } from "./components/sidebar.js";
 
 export const api = attachApi();
@@ -16,6 +17,7 @@ const sidebarButton = document.getElementById('sidebar-button');
 const addUrlsButton = document.getElementById('add-urls-button');
 
 await populateHistory();
+await createAllSettingCards();
 
 navPrev.addEventListener('click', () => changePage(-1));
 navNext.addEventListener('click', () => changePage(+1));

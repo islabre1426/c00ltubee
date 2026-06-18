@@ -9,10 +9,14 @@
 
 :root {
     --border-width: 0.3rem;
-    --border: var(--border-width) solid red;
+    --outline-color: red;
+    --border: var(--border-width) solid var(--outline-color);
     --font-lg: 2rem;
     --font-md: 1.5rem;
     --font-sm: 1rem;
+    --text-color: white;
+    --background: black;
+    --hover-color: #808080;
 }
 
 button {
@@ -25,13 +29,13 @@ button {
 }
 
 button:hover {
-    background-color: rgb(255, 255, 255, 50%);
+    background-color: var(--hover-color);
     cursor: pointer;
 }
 
 body {
-    background-color: black;
-    color: white;
+    background: var(--background);
+    color: var(--text-color);
 
     margin: 0;
     height: 100vh;
@@ -55,16 +59,12 @@ body {
     text-align: center;
 }
 
-#content header nav, .footer-buttons.paged {
+#content header nav {
     display: grid;
     grid-template-columns: 1fr var(--border-width) 2fr var(--border-width) 1fr;
 
     border: var(--border);
     border-width: var(--border-width) 0;
-}
-
-.footer-buttons.paged {
-    border-bottom: 0;
 }
 
 hr {
@@ -134,6 +134,60 @@ hr.vr {
 .footer-buttons {
     display: grid;
     grid-template-columns: 1fr var(--border-width) 1fr;
+}
+
+.content-main[data-page="Settings"] main {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 0.25rem;
+
+    background-color: var(--outline-color);
+    height: initial;
+
+    border-bottom: var(--border);
+}
+
+.setting-card {
+    display: flex;
+    flex-direction: column;
+
+    text-align: center;
+}
+
+.setting-card > *, .setting-card.empty {
+    background: var(--background);
+    width: 100%;
+}
+
+.setting-card .name {
+    margin-bottom: 0.25rem;
+}
+
+.setting-card input[type="text"], .setting-card input[type="button"] {
+    background: var(--background);
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    border: 0;
+
+    text-align: center;
+}
+
+input[type="button"], input[type="checkbox"] + label {
+    cursor: pointer;
+}
+
+.setting-card input[type="checkbox"] {
+    display: none;
+}
+
+input[type="checkbox"] + label {
+    padding: 1px;
+}
+
+input[type="text"]:hover, input[type="checkbox"] + label:hover, input[type="button"]:hover {
+    background-color: var(--hover-color);
 }
 
 #sidebar {

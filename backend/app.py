@@ -127,3 +127,18 @@ def save_setting():
     }
 
     return HTTPResponse(status = 200, body = json.dumps(response))
+
+
+@app.get('/folder-picker')
+def folder_picker():
+    selected_folder = windowhandler.folder_picker()
+
+    if selected_folder is None:
+        abort(404, 'Folder not chosen')
+    
+    response = {
+        'status': 'success',
+        'selectedFolder': selected_folder,
+    }
+
+    return HTTPResponse(status = 200, body = json.dumps(response))

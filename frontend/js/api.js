@@ -5,6 +5,9 @@ export function attachApi() {
         startDownload: async (url) => await fetchJson('/start-download', 'POST', { url: url }),
         startWorker: async () => await fetchJson('/start-worker'),
         getDownloadStatus: async (id) => await fetchJson('/status', 'POST', { id: id }),
+        getSettings: async () => await fetchJson('/settings'),
+        saveSetting: async (name, value) => await fetchJson('/save-setting', 'POST', { name: name, value: value }),
+        folderPicker: async () => await fetchJson('/folder-picker'),
     }
 }
 
