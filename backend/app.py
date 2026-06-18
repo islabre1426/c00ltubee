@@ -26,7 +26,7 @@ def static_files(filepath):
 @app.get('/history')
 def history():
     try:
-        history = download_history_db.get_all_in_dict()
+        history = download_history_db.get_all_as_list()
 
         response = {
             'status': 'success',

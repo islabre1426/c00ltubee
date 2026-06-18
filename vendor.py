@@ -1,5 +1,4 @@
 import stat
-import sys
 import tarfile
 from typing import Literal
 from dataclasses import dataclass
@@ -12,8 +11,10 @@ from tqdm import tqdm
 
 from pathlib import Path
 
+from util.util import current_os, get_root_dir
 
-vendor_dir = Path(Path(__file__).parent, 'vendor')
+
+vendor_dir = Path(get_root_dir(), 'vendor')
 
 
 # --- Spec definition ---
@@ -133,7 +134,7 @@ def extract_file(archive_file: Path, dest_dir: Path):
                 if not extracted_path.exists():
                     continue
 
-                if sys.platform == 'linux':
+                if current_os == 'linux':
                     # Extract high 16 bits (Unix file mode)
                     mode = info.external_attr >> 16
 

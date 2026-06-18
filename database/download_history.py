@@ -14,7 +14,7 @@ class _DownloadHistory:
             print(f'{self.name} database does not exist. Initializing.')
 
             with self.db_connector as db:
-                self.db_connector.load_sql_file(self.name)
+                db.load_sql_file(self.name)
         else:
             print(f'{self.name} database already exists. Skipping initialization.')
 
@@ -24,7 +24,7 @@ class _DownloadHistory:
         task_id: str,
         title: str,
         status_type: str,
-        log_file_path: str = None,
+        log_file_path: str | None = None,
     ):
         with self.db_connector as db:
             db.cursor.execute(
@@ -48,10 +48,10 @@ class _DownloadHistory:
             return result
     
 
-    def get_all_in_dict(self):
+    def get_all_as_list(self):
         with self.db_connector as db:
             db.cursor.execute(
-                f'SELECT * FROM {self.name}'
+                f'SELECT * FROM {self.name}',
             )
 
             result: list[dict] = []
@@ -72,7 +72,7 @@ class _DownloadHistory:
         task_id: str,
         title: str,
         status_type: str,
-        log_file_path: str = None
+        log_file_path: str | None = None
     ):
         with self.db_connector as db:
             db.cursor.execute(
@@ -104,7 +104,7 @@ class _DownloadHistory:
     def delete_all(self):
         with self.db_connector as db:
             db.cursor.execute(
-                f'DELETE FROM {self.name}'
+                f'DELETE FROM {self.name}',
             )
 
 

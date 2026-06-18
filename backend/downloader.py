@@ -5,8 +5,9 @@ import threading
 
 from yt_dlp import YoutubeDL
 
-from backend.config import get_app_data_location, get_downloader_opts
+from backend.config import get_downloader_opts
 from database.download_history import download_history_db
+from util.util import get_app_data_location
 
 
 _queue = Queue()
@@ -101,7 +102,7 @@ def _create_hook(task_id: str):
     return _hooks
 
 
-def _download_video(opts: dict, task_id: str, url: str):
+def _download_video(opts: dict, task_id: str, url: str, log_file_path: str):
     try:
         with YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download = False)
@@ -119,6 +120,7 @@ def _download_video(opts: dict, task_id: str, url: str):
                 task_id,
                 title,
                 'working',
+                log_file_path
             )
 
             _download_tasks[task_id].update({
@@ -143,15 +145,17 @@ def start_worker():
 
         task_id, url = task
 
+        logger = Logger(task_id)
+
         ydl_opts = {
             **get_downloader_opts(),
             'progress_hooks': [_create_hook(task_id)],
-            'logger': Logger(task_id),
+            'logger': logger,
         }
 
         threading.Thread(
             target = _download_video,
-            args = (ydl_opts, task_id, url,),
+            args = (ydl_opts, task_id, url, logger.log_path),
             daemon = True,
         ).start()
 
