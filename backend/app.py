@@ -6,6 +6,7 @@ from bottle import Bottle, static_file, request, abort, HTTPResponse
 
 from backend import downloader, windowhandler
 from database.download_history import download_history_db
+from database.setting import setting_db
 
 
 app = Bottle()
@@ -97,6 +98,32 @@ def get_download_status():
     response = {
         'status': 'success',
         'info': info,
+    }
+
+    return HTTPResponse(status = 200, body = json.dumps(response))
+
+
+@app.get('/settings')
+def get_settings():
+    settings = setting_db.get_all_as_list()
+
+    response = {
+        'status': 'success',
+        'settings': settings,
+    }
+
+    return HTTPResponse(status = 200, body = json.dumps(response))
+
+
+@app.post('/save-setting')
+def save_setting():
+    name = request.json['name']
+    value = request.json['value']
+
+    setting_db.update_user_value_by_name(name, value)
+
+    response = {
+        'status': 'success',
     }
 
     return HTTPResponse(status = 200, body = json.dumps(response))
