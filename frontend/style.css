@@ -55,12 +55,16 @@ body {
     text-align: center;
 }
 
-#content header nav {
+#content header nav, .footer-buttons.paged {
     display: grid;
     grid-template-columns: 1fr var(--border-width) 2fr var(--border-width) 1fr;
 
     border: var(--border);
     border-width: var(--border-width) 0;
+}
+
+.footer-buttons.paged {
+    border-bottom: 0;
 }
 
 hr {
@@ -73,14 +77,18 @@ hr.vr {
     height: 100%;
 }
 
-#content-main {
-    display: flex;
+.content-main {
+    display: none;
     flex-direction: column;
 
     height: 100%;
 }
 
-#content-main main {
+.content-main.active {
+    display: flex;
+}
+
+.content-main main {
     height: 100%;
 
     font-size: var(--font-md);
@@ -119,7 +127,7 @@ hr.vr {
     padding-right: 0.25rem;
 }
 
-#content-main footer {
+.content-main footer {
     border-top: var(--border);
 }
 

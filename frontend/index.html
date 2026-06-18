@@ -9,26 +9,38 @@
 	<title>c00ltubee</title>
 </head>
 <body>
-	<section id="content" data-page="home">
+	<section id="content">
 		<header>
 		  <span id="title">c00ltubee</span>
 
       <nav>
-        <button id="prev">&lt;</button>
+        <button id="nav-prev">&lt;</button>
         <hr class="vr">
-        <span id="indicator">Home</span>
+        <span id="nav-indicator">Home</span>
         <hr class="vr">
-        <button id="next">&gt;</button>
+        <button id="nav-next">&gt;</button>
       </nav>
 		</header>
 
-    <div id="content-main">
+    <div class="content-main active" data-page="Home">
       <main></main>
   
       <footer class="footer-buttons">
         <button id="add-urls-button">Add URLs</button>
         <hr class="vr">
         <button id="clear-history-button">Clear History</button>
+      </footer>
+    </div>
+
+    <div class="content-main" data-page="Settings">
+      <main></main>
+
+      <footer class="footer-buttons paged">
+        <button id="footer-prev">&lt;</button>
+        <hr class="vr">
+        <span id="footer-indicator"></span>
+        <hr class="vr">
+        <button id="footer-next">&gt;</button>
       </footer>
     </div>
 	</section>
