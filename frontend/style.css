@@ -208,7 +208,7 @@ input[type="text"]:hover, input[type="checkbox"] + label:hover, input[type="butt
     text-align: center;
 }
 
-.add-urls-container main {
+.add-urls-container main, .card-info-container main {
     height: 100%;
     border: var(--border);
     border-width: var(--border-width) 0;
@@ -231,9 +231,32 @@ input[type="text"]:hover, input[type="checkbox"] + label:hover, input[type="butt
     text-align: center;
 }
 
-.add-urls-container button {
+.add-urls-container button, .card-info-container button {
     width: 100%;
-} 
+}
+
+.card-info-container {
+    font-size: var(--font-md);
+}
+
+.card-info-container header, .card-info-container .log {
+    padding: 0.25rem;
+}
+
+.card-info-container .task-id {
+    font-size: var(--font-sm);
+}
+
+.card-info-container .log {
+    white-space: pre-wrap;
+}
+
+.card-info-container footer {
+    font-size: var(--font-lg);
+
+    display: grid;
+    grid-template-columns: 1fr var(--border-width) 1fr;
+}
 
 #sidebar-button {
     height: 100%;

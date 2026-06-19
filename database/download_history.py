@@ -48,6 +48,12 @@ class _DownloadHistory:
             return result
     
 
+    def get_log_file_path_by_id(self, task_id: str):
+        history = self.get_by_id(task_id)
+
+        return history[3]
+    
+
     def get_all_as_list(self):
         with self.db_connector as db:
             db.cursor.execute(

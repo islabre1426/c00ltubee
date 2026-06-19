@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from bottle import Bottle, static_file, request, abort, HTTPResponse
 
-from backend import downloader, windowhandler
+from backend import downloader, windowhandler, log
 from database.download_history import download_history_db
 from database.setting import setting_db
 
@@ -37,6 +37,33 @@ def history():
         return HTTPResponse(status = 200, body = json.dumps(response))
     except:
         abort(404, 'History not found')
+
+
+@app.post('/delete-history')
+def delete_history():
+    task_id = request.json['id']
+
+    if task_id is None:
+        abort(404, 'id not found')
+    
+    download_history_db.delete_by_id(task_id)
+
+    response = {
+        'status': 'success'
+    }
+
+    return HTTPResponse(status = 200, body = json.dumps(response))
+
+
+@app.get('/delete-all-history')
+def delete_all_history():
+    download_history_db.delete_all()
+
+    response = {
+        'status': 'success'
+    }
+
+    return HTTPResponse(status = 200, body = json.dumps(response))
 
 
 @app.post('/extend-sidebar')
@@ -98,6 +125,26 @@ def get_download_status():
     response = {
         'status': 'success',
         'info': info,
+    }
+
+    return HTTPResponse(status = 200, body = json.dumps(response))
+
+
+@app.post('/log')
+def get_log():
+    task_id = request.json['id']
+
+    if task_id is None:
+        abort(404, 'id not found')
+    
+    log_content = log.get_log(task_id)
+
+    if log_content is None:
+        abort(404, 'Log not found')
+
+    response = {
+        'status': 'success',
+        'content': log_content,
     }
 
     return HTTPResponse(status = 200, body = json.dumps(response))

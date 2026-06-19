@@ -1,6 +1,6 @@
 import { api, state } from '../main.js';
 
-export async function toggleSidebar(sidebarState) {
+export async function toggleSidebar(sidebarState, cardViewButton = null) {
     const sidebarMain = document.getElementById('sidebar-main');
     const sidebarButton = document.getElementById('sidebar-button');
 
@@ -12,4 +12,8 @@ export async function toggleSidebar(sidebarState) {
     sidebarMain.style.width = state.isSidebarExtended ? `${newWidth}px` : 'initial';
     sidebarMain.style.display = state.isSidebarExtended ? 'flex' : 'none';
     sidebarButton.textContent = state.isSidebarExtended ? '<' : '>';
+
+    if (cardViewButton) {
+        cardViewButton.textContent = state.isSidebarExtended ? '<' : '>';
+    }
 }

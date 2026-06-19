@@ -155,7 +155,7 @@ def start_worker():
 
         threading.Thread(
             target = _download_video,
-            args = (ydl_opts, task_id, url, logger.log_path),
+            args = (ydl_opts, task_id, url, str(logger.log_path)),
             daemon = True,
         ).start()
 

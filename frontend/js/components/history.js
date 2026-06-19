@@ -6,9 +6,20 @@ export async function populateHistory() {
     const history = response.history;
 
     history.forEach((entry) => {
-        createDownloadCard(entry['task_id'], entry['title']);
-        updateDownloadCard(entry['task_id'], {
+        const info = {
+            'title': entry['title'],
             'status': entry['status_type'],
-        });
+        }
+
+        createDownloadCard(entry['task_id'], info.title, info);
+        updateDownloadCard(entry['task_id'], info);
     });
+}
+
+export async function handleDeleteHistory(taskId) {
+    await api.deleteHistory(taskId);
+}
+
+export async function handleDeleteAllHistory() {
+    await api.deleteAllHistory();
 }

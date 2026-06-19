@@ -1,4 +1,9 @@
-export function createDownloadCard(taskId, title = null) {
+import { state } from "../main.js";
+import { handleDeleteHistory } from "./history.js";
+import { getLog } from "./log.js";
+import { toggleSidebar } from "./sidebar.js";
+
+export function createDownloadCard(taskId, title = null, info = null) {
     const container = document.createElement('div');
     container.classList.add('download-card');
     container.dataset.taskId = taskId;
@@ -15,6 +20,18 @@ export function createDownloadCard(taskId, title = null) {
     `;
 
     document.querySelector('.content-main[data-page="Home"] main').prepend(container);
+
+    const cardViewButton = container.querySelector('.card-view');
+    let isViewing = false;
+
+    cardViewButton.addEventListener('click', async () => {
+        isViewing = state.isSidebarExtended ? true : false;
+
+        toggleSidebar(!isViewing, cardViewButton);
+
+        await renderCardInfo(taskId, title);
+        updateCardInfo(taskId, info);
+    });
 }
 
 export function updateDownloadCard(taskId, info) {
@@ -66,22 +83,84 @@ export function updateDownloadCard(taskId, info) {
     statusElement.textContent = statusText;
 }
 
-// function renderCardInfo(taskId) {
-//     const sidebarMain = document.getElementById('sidebar-main');
+export async function renderCardInfo(taskId, title = null) {
+    const sidebarMain = document.getElementById('sidebar-main');
 
-//     sidebarMain.dataset.contentType = 'card-info';
-//     sidebarMain.dataset.taskId = taskId;
-//     sidebarMain.classList.add('card-info-container');
+    sidebarMain.dataset.contentType = 'card-info';
+    sidebarMain.dataset.taskId = taskId;
+    sidebarMain.classList.add('card-info-container');
 
-//     sidebarMain.innerHTML = `
-//     <header>
-//         <span class="title">Add URLs to Download</span>
-//     </header>
-//     <main>
-//         <textarea id="urls"></textarea>
-//     </main>
-//     <footer>
-//         <button id="inject-button">Inject!!</button>
-//     </footer>
-//     `;
-// }
+    sidebarMain.innerHTML = `
+    <header>
+        <div class="title">${title ? title : 'Waiting...'}</div>
+        <div class="task-id">ID: ${taskId}</div>
+    </header>
+    <main>
+        <div class="log"></div>
+    </main>
+    <footer>
+        <button class="task-button"></button>
+        <hr class="vr">
+        <button id="delete-button">Delete</button>
+    </footer>
+    `;
+
+    const deleteButton = document.getElementById('delete-button');
+
+    const log = await getLog(taskId);
+    updateLog(taskId, log);
+
+    deleteButton.addEventListener('click', () => handleDeleteHistory(taskId));
+}
+
+export function updateCardInfo(taskId, info) {
+    const cardInfo = document.querySelector(`#sidebar-main[data-content-type="card-info"][data-task-id="${taskId}"]`);
+
+    if (!cardInfo) return;
+
+    const taskButton = cardInfo.querySelector('.task-button');
+    const deleteButton = cardInfo.querySelector('#delete-button');
+
+    if (!taskButton || !deleteButton) return;
+
+    let taskButtonOperation;
+    let taskButtonText;
+    let enableDelete = false;
+
+    switch (info['status']) {
+        case 'starting':
+        case 'downloading':
+        case 'queued':
+            taskButtonOperation = 'cancel';
+            taskButtonText = 'Cancel';
+            enableDelete = false;
+            break;
+        
+        case 'finished':
+            taskButtonOperation = 'redownload';
+            taskButtonText = 'Redownload';
+            enableDelete = true;
+            break;
+        
+        case 'error':
+            taskButtonOperation = 'retry';
+            taskButtonText = 'Retry';
+            enableDelete = true;
+            break;
+    }
+
+    taskButton.dataset.operation = taskButtonOperation;
+    taskButton.textContent = taskButtonText;
+
+    deleteButton.disabled = enableDelete ? true : false;
+}
+
+export function updateLog(taskId, log) {
+    const cardInfo = document.querySelector(`#sidebar-main[data-content-type="card-info"][data-task-id="${taskId}"]`);
+
+    if (!cardInfo) return;
+
+    const logElement = cardInfo.querySelector('.log');
+
+    logElement.textContent = log;
+}

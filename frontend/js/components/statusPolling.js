@@ -1,19 +1,23 @@
 import { api, state } from "../main.js";
-import { updateDownloadCard } from "./downloadCard.js";
+import { updateCardInfo, updateDownloadCard, updateLog } from "./downloadCard.js";
+import { getLog } from "./log.js";
+
+const delayMs = 250;
 
 export async function startStatusPolling(taskId) {
-    const delayMs = 250;
-
     return setInterval(async () => {
-        const response = await api.getDownloadStatus(taskId);
-        const info = response.info;
+        const statusResponse = await api.getDownloadStatus(taskId);
+        const log = await getLog(taskId);
+        const statusInfo = statusResponse.info;
         const stopPollingStatus = ['finished', 'error'];
 
-        if (stopPollingStatus.includes(info.status)) {
+        if (stopPollingStatus.includes(statusInfo.status)) {
             stopStatusPolling(taskId);
         }
 
-        updateDownloadCard(taskId, info);
+        updateDownloadCard(taskId, statusInfo);
+        updateCardInfo(taskId, statusInfo);
+        updateLog(taskId, log);
     }, delayMs);
 }
 
