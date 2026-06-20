@@ -140,12 +140,8 @@ hr.vr {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(5, 1fr);
-    gap: 0.25rem;
 
-    background-color: var(--outline-color);
     height: initial;
-
-    border-bottom: var(--border);
 }
 
 .setting-card {
@@ -153,19 +149,23 @@ hr.vr {
     flex-direction: column;
 
     text-align: center;
+    border-bottom: var(--border);
+}
+
+.setting-card:nth-child(odd) {
+    border-right: var(--border);
 }
 
 .setting-card > *, .setting-card.empty {
-    background: var(--background);
     width: 100%;
 }
 
 .setting-card .name {
-    margin-bottom: 0.25rem;
+    border-bottom: var(--border);
 }
 
 .setting-card input[type="text"], .setting-card input[type="button"] {
-    background: var(--background);
+    background: inherit;
     color: inherit;
     font-family: inherit;
     font-size: inherit;
