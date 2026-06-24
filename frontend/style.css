@@ -82,6 +82,7 @@ hr.vr {
     flex-direction: column;
 
     height: 100%;
+    min-height: 0;
 }
 
 .content-main.active {
@@ -90,8 +91,11 @@ hr.vr {
 
 .content-main main {
     height: 100%;
-
     font-size: var(--font-md);
+    overflow-y: auto;
+
+    container-type: scroll-state;
+    container-name: content-main;
 }
 
 .download-card {
@@ -216,7 +220,7 @@ input[type="text"]:hover, input[type="checkbox"] + label:hover, input[type="butt
 }
 
 .card-info-container main {
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .add-urls-container textarea {
@@ -264,4 +268,25 @@ input[type="text"]:hover, input[type="checkbox"] + label:hover, input[type="butt
 
 #sidebar-button {
     height: 100%;
+}
+
+::-webkit-scrollbar {
+    background-color: inherit;
+    width: 12px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-clip: padding-box;
+    border: var(--border-width) solid transparent;
+    background-color: var(--outline-color);
+}
+
+@container content-main scroll-state(scrollable: y) {
+    .download-card:last-child {
+        border-bottom: 0;
+    }
+
+    .download-card .operations button {
+        border-right: var(--border);
+    }
 }

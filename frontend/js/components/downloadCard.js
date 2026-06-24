@@ -86,6 +86,9 @@ export function updateDownloadCard(taskId, info) {
 export async function renderCardInfo(taskId, title = null) {
     const sidebarMain = document.getElementById('sidebar-main');
 
+    // Reset class list
+    sidebarMain.className = '';
+
     sidebarMain.dataset.contentType = 'card-info';
     sidebarMain.dataset.taskId = taskId;
     sidebarMain.classList.add('card-info-container');
@@ -118,14 +121,17 @@ export function updateCardInfo(taskId, info) {
 
     if (!cardInfo) return;
 
+    const titleElement = cardInfo.querySelector('.title');
     const taskButton = cardInfo.querySelector('.task-button');
     const deleteButton = cardInfo.querySelector('#delete-button');
 
-    if (!taskButton || !deleteButton) return;
+    if (!titleElement || !taskButton || !deleteButton) return;
 
     let taskButtonOperation;
     let taskButtonText;
     let enableDelete = false;
+
+    titleElement.textContent = info['title'];
 
     switch (info['status']) {
         case 'starting':

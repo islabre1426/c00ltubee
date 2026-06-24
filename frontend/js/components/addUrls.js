@@ -6,6 +6,9 @@ import { startStatusPolling } from './statusPolling.js';
 function renderAddUrlsUI() {
     const sidebarMain = document.getElementById('sidebar-main');
 
+    // Reset class list
+    sidebarMain.className = '';
+
     sidebarMain.dataset.contentType = 'add-urls';
     sidebarMain.classList.add('add-urls-container');
 
@@ -69,7 +72,7 @@ export async function handleAddUrlsButton() {
     const currentContentType = sidebarMain.dataset.contentType;
 
     if (state.isSidebarExtended) {
-        if (!currentContentType || currentContentType === '') {
+        if (!currentContentType || currentContentType === '' || currentContentType !== 'add-urls') {
             renderAddUrlsUI();
         
         } else if (currentContentType === 'add-urls') {
