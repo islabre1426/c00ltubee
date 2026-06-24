@@ -56,6 +56,11 @@ def _on_task_error(task_id: str):
 
 
 def _on_task_success(task_id: str, title: str | None = None):
+    task = {
+        'status': 'finished',
+        'progress': 100,
+    }
+
     if title:
         download_history_db.update_by_id(
             task_id,
@@ -63,22 +68,23 @@ def _on_task_success(task_id: str, title: str | None = None):
             'finished',
         )
 
+        task.update({
+            'title': title,
+        })
+
     else:
         download_history_db.update_status_by_id(
             task_id,
             'finished',
         )
 
-    _download_tasks[task_id].update({
-        'status': 'finished',
-        'title': title,
-        'progress': 100,
-    })
+    _download_tasks[task_id].update(task)
 
 
 def _create_hook(task_id: str):
     def _hooks(d: dict):
         status = d.get('status')
+        info = d.get('info_dict')
 
         match status:
             case 'downloading':

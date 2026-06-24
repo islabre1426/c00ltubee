@@ -1,4 +1,4 @@
-import { state } from "../main.js";
+import { api, state } from "../main.js";
 import { handleDeleteHistory } from "./history.js";
 import { getLog } from "./log.js";
 import { toggleSidebar } from "./sidebar.js";
@@ -50,8 +50,16 @@ async function handleCardViewButton(taskId, info) {
         cardViewButton.textContent = '<';
     }
 
-    await renderCardInfo(taskId, info);
-    updateCardInfo(taskId, info);
+    let passedInfo = info;
+    
+    // Make sure card view info is updated even after finished downloading
+    if (Object.keys(info).length === 0) {
+        const response = await api.getDownloadStatus(taskId);
+        passedInfo = response.info;
+    }
+
+    await renderCardInfo(taskId, passedInfo);
+    updateCardInfo(taskId, passedInfo);
 }
 
 export function updateDownloadCard(taskId, info) {
