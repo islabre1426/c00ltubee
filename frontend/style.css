@@ -215,6 +215,10 @@ input[type="text"]:hover, input[type="checkbox"] + label:hover, input[type="butt
     font-size: 1rem;
 }
 
+.card-info-container main {
+    overflow-y: scroll;
+}
+
 .add-urls-container textarea {
     width: 100%;
     height: 100%;

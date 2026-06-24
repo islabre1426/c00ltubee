@@ -28,7 +28,7 @@ class Logger:
         if not log_path_parent.exists():
             log_path_parent.mkdir(parents = True)
         
-        with self.log_path.open('a') as f:
+        with self.log_path.open(mode = 'a', encoding = 'utf-8') as f:
             f.write(msg + '\n')
     
 
@@ -55,7 +55,7 @@ def _on_task_error(task_id: str):
     })
 
 
-def _on_task_success(task_id: str, title: str = None):
+def _on_task_success(task_id: str, title: str | None = None):
     if title:
         download_history_db.update_by_id(
             task_id,
