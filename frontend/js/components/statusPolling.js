@@ -17,7 +17,10 @@ export async function startStatusPolling(taskId) {
 
         updateDownloadCard(taskId, statusInfo);
         updateCardInfo(taskId, statusInfo);
-        updateLog(taskId, log);
+
+        if (log) {
+            updateLog(taskId, log);
+        }
     }, delayMs);
 }
 

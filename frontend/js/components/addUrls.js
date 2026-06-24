@@ -44,7 +44,7 @@ async function handleDownload() {
 
         const taskId = response.taskId;
 
-        createDownloadCard(taskId);
+        createDownloadCard(taskId, {});
 
         state.pollers[taskId] = await startStatusPolling(taskId);
     }

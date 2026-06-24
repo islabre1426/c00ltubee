@@ -28,7 +28,7 @@
       <footer class="footer-buttons">
         <button id="add-urls-button">Add URLs</button>
         <hr class="vr">
-        <button id="clear-history-button">Clear History</button>
+        <button id="clear-history-button" popovertarget="confirm-dialog">Clear History</button>
       </footer>
     </div>
 
@@ -40,6 +40,14 @@
     <section id="sidebar-main"></section>
     <button id="sidebar-button">&gt;</button>
   </div>
+
+  <dialog id="confirm-dialog" popover="auto">
+    <p id="confirm-message"></p>
+    <div class="buttons">
+      <button popovertarget="confirm-dialog" popovertargetaction="hide">No</button>
+      <button id="confirm-yes" data-action="" popovertarget="confirm-dialog" popovertargetaction="hide">Yes</button>
+    </div>
+  </dialog>
 
   <script type="module" src="js/main.js"></script>
 </body>

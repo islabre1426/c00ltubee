@@ -140,7 +140,11 @@ def get_log():
     log_content = log.get_log(task_id)
 
     if log_content is None:
-        abort(404, 'Log not found')
+        response = {
+            'status': 'no content found',
+        }
+
+        return HTTPResponse(status = 200, body = json.dumps(response))
 
     response = {
         'status': 'success',

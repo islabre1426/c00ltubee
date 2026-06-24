@@ -3,14 +3,14 @@ import { handleDeleteHistory } from "./history.js";
 import { getLog } from "./log.js";
 import { toggleSidebar } from "./sidebar.js";
 
-export function createDownloadCard(taskId, title = null, info = null) {
+export function createDownloadCard(taskId, info) {
     const container = document.createElement('div');
     container.classList.add('download-card');
     container.dataset.taskId = taskId;
 
     container.innerHTML = `
     <div class="info">
-        <div class="title">${title ? title : 'Waiting...'}</div>
+        <div class="title">${info['title'] ? info['title'] : 'Waiting...'}</div>
         <div class="status"></div>
     </div>
     <div class="operations">
@@ -23,10 +23,10 @@ export function createDownloadCard(taskId, title = null, info = null) {
 
     const cardViewButton = container.querySelector('.card-view');
 
-    cardViewButton.addEventListener('click', async () => await handleCardViewButton(taskId, title, info));
+    cardViewButton.addEventListener('click', async () => await handleCardViewButton(taskId, info));
 }
 
-async function handleCardViewButton(taskId, title = null, info = null) {
+async function handleCardViewButton(taskId, info) {
     const card = document.querySelector(`.download-card[data-task-id="${taskId}"]`);
     const cardViewButton = card.querySelector('.card-view');
     const sidebarMain = document.getElementById('sidebar-main');
@@ -50,7 +50,7 @@ async function handleCardViewButton(taskId, title = null, info = null) {
         cardViewButton.textContent = '<';
     }
 
-    await renderCardInfo(taskId, title);
+    await renderCardInfo(taskId, info);
     updateCardInfo(taskId, info);
 }
 
@@ -103,7 +103,7 @@ export function updateDownloadCard(taskId, info) {
     statusElement.textContent = statusText;
 }
 
-export async function renderCardInfo(taskId, title = null) {
+export async function renderCardInfo(taskId, info) {
     const sidebarMain = document.getElementById('sidebar-main');
 
     // Reset class list
@@ -115,7 +115,7 @@ export async function renderCardInfo(taskId, title = null) {
 
     sidebarMain.innerHTML = `
     <header>
-        <div class="title">${title ? title : 'Waiting...'}</div>
+        <div class="title">${info['title'] ? info['title'] : 'Waiting...'}</div>
         <div class="task-id">ID: ${taskId}</div>
     </header>
     <main>
@@ -124,16 +124,26 @@ export async function renderCardInfo(taskId, title = null) {
     <footer>
         <button class="task-button"></button>
         <hr class="vr">
-        <button id="delete-button">Delete</button>
+        <button id="delete-button" popovertarget="confirm-dialog">Delete</button>
     </footer>
     `;
 
     const deleteButton = document.getElementById('delete-button');
 
     const log = await getLog(taskId);
-    updateLog(taskId, log);
 
-    deleteButton.addEventListener('click', () => handleDeleteHistory(taskId));
+    if (log) {
+        updateLog(taskId, log);
+    }
+
+    deleteButton.addEventListener('click', () => {
+        const confirmDialogYesAction = document.getElementById('confirm-yes');
+        const confirmMessage = document.getElementById('confirm-message');
+
+        confirmMessage.textContent = `Are you sure to delete history id\n"${taskId}"?`;
+        confirmDialogYesAction.dataset.action = 'delete-history';
+        confirmDialogYesAction.dataset.id = taskId;
+    });
 }
 
 export function updateCardInfo(taskId, info) {
@@ -178,7 +188,7 @@ export function updateCardInfo(taskId, info) {
     taskButton.dataset.operation = taskButtonOperation;
     taskButton.textContent = taskButtonText;
 
-    deleteButton.disabled = enableDelete ? true : false;
+    deleteButton.disabled = enableDelete ? false : true;
 }
 
 export function updateLog(taskId, log) {
