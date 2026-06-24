@@ -22,16 +22,36 @@ export function createDownloadCard(taskId, title = null, info = null) {
     document.querySelector('.content-main[data-page="Home"] main').prepend(container);
 
     const cardViewButton = container.querySelector('.card-view');
-    let isViewing = false;
 
-    cardViewButton.addEventListener('click', async () => {
-        isViewing = state.isSidebarExtended ? true : false;
+    cardViewButton.addEventListener('click', async () => await handleCardViewButton(taskId, title, info));
+}
 
-        toggleSidebar(!isViewing, cardViewButton);
+async function handleCardViewButton(taskId, title = null, info = null) {
+    const card = document.querySelector(`.download-card[data-task-id="${taskId}"]`);
+    const cardViewButton = card.querySelector('.card-view');
+    const sidebarMain = document.getElementById('sidebar-main');
 
-        await renderCardInfo(taskId, title);
-        updateCardInfo(taskId, info);
-    });
+    const viewingCardId = sidebarMain.dataset.taskId;
+
+    const isViewing = (state.isSidebarExtended && (viewingCardId === taskId)) ? true : false;
+
+    if (!state.isSidebarExtended) {
+        await toggleSidebar(true);
+        cardViewButton.textContent = '<';
+    }
+
+    if (isViewing) {
+        await toggleSidebar(false);
+        cardViewButton.textContent = '>';
+        return;
+    } else if (viewingCardId !== undefined && viewingCardId !== taskId) {
+        const previousViewingCard = document.querySelector(`.download-card[data-task-id="${viewingCardId}"]`);
+        previousViewingCard.querySelector('.card-view').textContent = '>';
+        cardViewButton.textContent = '<';
+    }
+
+    await renderCardInfo(taskId, title);
+    updateCardInfo(taskId, info);
 }
 
 export function updateDownloadCard(taskId, info) {

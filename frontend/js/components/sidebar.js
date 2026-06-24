@@ -1,6 +1,6 @@
 import { api, state } from '../main.js';
 
-export async function toggleSidebar(sidebarState, cardViewButton = null) {
+export async function toggleSidebar(sidebarState) {
     const sidebarMain = document.getElementById('sidebar-main');
     const sidebarButton = document.getElementById('sidebar-button');
 
@@ -13,7 +13,9 @@ export async function toggleSidebar(sidebarState, cardViewButton = null) {
     sidebarMain.style.display = state.isSidebarExtended ? 'flex' : 'none';
     sidebarButton.textContent = state.isSidebarExtended ? '<' : '>';
 
-    if (cardViewButton) {
-        cardViewButton.textContent = state.isSidebarExtended ? '<' : '>';
+    if (sidebarMain.dataset.taskId !== undefined) {
+        const card = document.querySelector(`.download-card[data-task-id="${sidebarMain.dataset.taskId}"]`);
+
+        card.querySelector('.card-view').textContent = '>';
     }
 }

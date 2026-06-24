@@ -79,11 +79,27 @@ export async function handleAddUrlsButton() {
             await toggleSidebar(false);
         }
 
+        if (sidebarMain.dataset.taskId) {
+            const card = document.querySelector(`.download-card[data-task-id="${sidebarMain.dataset.taskId}"]`);
+
+            card.querySelector('.card-view').textContent = '>';
+
+            sidebarMain.removeAttribute('data-task-id');
+        }
+
         return;
     }
 
     if (currentContentType !== 'add-urls') {
         renderAddUrlsUI();
+    }
+
+    if (sidebarMain.dataset.taskId) {
+        const card = document.querySelector(`.download-card[data-task-id="${sidebarMain.dataset.taskId}"]`);
+
+        card.querySelector('.card-view').textContent = '>';
+
+        sidebarMain.removeAttribute('data-task-id');
     }
 
     await toggleSidebar(true);
