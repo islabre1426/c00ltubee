@@ -276,6 +276,10 @@ input[type="text"]:hover, input[type="checkbox"] + label:hover, input[type="butt
     width: 12px;
 }
 
+::-webkit-scrollbar:horizontal {
+    height: 12px;
+}
+
 ::-webkit-scrollbar-thumb {
     background-clip: padding-box;
     border: var(--border-width) solid transparent;

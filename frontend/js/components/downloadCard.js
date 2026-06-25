@@ -38,8 +38,9 @@ async function handleCardViewButton(taskId, info) {
 
     if (!state.isSidebarExtended) {
         await toggleSidebar(true);
-        cardViewButton.textContent = '<';
     }
+    
+    cardViewButton.textContent = '<';
 
     if (isViewing) {
         await toggleSidebar(false);
