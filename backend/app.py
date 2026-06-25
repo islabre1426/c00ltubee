@@ -24,7 +24,7 @@ def static_files(filepath):
     return static_file(filepath, root = _static_folder)
 
 
-@app.get('/history')
+@app.get('/all-history')
 def history():
     try:
         history = download_history_db.get_all_as_list()
@@ -35,6 +35,27 @@ def history():
         }
 
         return HTTPResponse(status = 200, body = json.dumps(response))
+    except:
+        abort(404, 'History not found')
+
+
+@app.post('/history')
+def get_history():
+    task_id = request.json['id']
+
+    if task_id is None:
+        abort(404, 'id not found')
+
+    try:
+        history = download_history_db.get_by_id_as_dict(task_id)
+
+        response = {
+            'status': 'success',
+            'history': history,
+        }
+
+        return HTTPResponse(status = 200, body = json.dumps(response))
+    
     except:
         abort(404, 'History not found')
 
@@ -85,12 +106,16 @@ def extend_sidebar():
 @app.post('/start-download')
 def start_download():
     url = request.json['url']
+    req_task_id = request.json['taskId']
 
     if url is None:
         abort(404, 'urls not found')
     
     # Assign tasks before the UI starts polling
-    task_id = str(uuid4())
+    if req_task_id is None:
+        task_id = str(uuid4())
+    else:
+        task_id = req_task_id
     
     downloader.add_task_to_queue(task_id, url)
 
@@ -149,6 +174,22 @@ def get_log():
     response = {
         'status': 'success',
         'content': log_content,
+    }
+
+    return HTTPResponse(status = 200, body = json.dumps(response))
+
+
+@app.post('/cancel-download')
+def cancel_download():
+    task_id = request.json['id']
+
+    if task_id is None:
+        abort(404, 'id not found')
+
+    downloader.cancel_task(task_id)
+
+    response = {
+        'status': 'success',
     }
 
     return HTTPResponse(status = 200, body = json.dumps(response))

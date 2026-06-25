@@ -12,6 +12,7 @@ from util.util import get_app_data_location
 
 _queue = Queue()
 _download_tasks = {}
+_cancelling_tasks = set()
 _app_data_location = get_app_data_location()
 
 
@@ -51,20 +52,20 @@ def _on_task_error(task_id: str):
 
     _download_tasks[task_id].update({
         'status': 'error',
-        'progress': 0,
     })
 
 
-def _on_task_success(task_id: str, title: str | None = None):
+def _on_task_success(task_id: str, title: str | None = None, url: str | None = None):
     task = {
         'status': 'finished',
         'progress': 100,
     }
 
-    if title:
+    if title and url:
         download_history_db.update_by_id(
             task_id,
             title,
+            url,
             'finished',
         )
 
@@ -81,10 +82,22 @@ def _on_task_success(task_id: str, title: str | None = None):
     _download_tasks[task_id].update(task)
 
 
+def _on_task_cancelled(task_id: str):
+    download_history_db.update_status_by_id(task_id, 'cancelled')
+
+    _download_tasks[task_id].update({
+        'status': 'cancelled',
+    })
+
+    _cancelling_tasks.discard(task_id)
+
+
 def _create_hook(task_id: str):
     def _hooks(d: dict):
+        if task_id in _cancelling_tasks:
+            raise Exception(f'Task {task_id} cancelled by user')
+
         status = d.get('status')
-        info = d.get('info_dict')
 
         match status:
             case 'downloading':
@@ -121,10 +134,16 @@ def _download_video(opts: dict, task_id: str, url: str, log_file_path: str):
             if output_filename.exists():
                 _on_task_success(task_id, title)
                 return
+            
+            # Support cancelling before the actual download
+            if task_id in _cancelling_tasks:
+                _on_task_cancelled(task_id)
+                return
 
             download_history_db.update_by_id(
                 task_id,
                 title,
+                url,
                 'working',
                 log_file_path
             )
@@ -138,8 +157,12 @@ def _download_video(opts: dict, task_id: str, url: str, log_file_path: str):
             ydl.download([url])
 
     except Exception:
-        _on_task_error(task_id)
-        raise
+        # Exception caused by intentional cancellation
+        if task_id in _cancelling_tasks:
+            _on_task_cancelled(task_id)
+        else:
+            _on_task_error(task_id)
+            raise
 
 
 def start_worker():
@@ -159,27 +182,44 @@ def start_worker():
             'logger': logger,
         }
 
-        threading.Thread(
+        task_process = threading.Thread(
             target = _download_video,
             args = (ydl_opts, task_id, url, str(logger.log_path)),
             daemon = True,
-        ).start()
+            name = task_id,
+        )
+
+        task_process.start()
 
 
 def add_task_to_queue(task_id: str, url: str):
     task = (task_id, url)
     _queue.put(task)
 
-    download_history_db.add(
-        task_id,
-        'Waiting...',
-        'queued',
-    )
+    try:
+        _ = download_history_db.get_by_id(task_id)
+    except:
+        download_history_db.add(
+            task_id,
+            'Waiting...',
+            url,
+            'queued',
+        )
 
     _download_tasks[task_id] = {
         'status': 'queued'
     }
 
 
-def get_task_info(task_id: str):
+def get_task_info(task_id: str) -> dict:
     return _download_tasks[task_id]
+
+
+def cancel_task(task_id: str):
+    if task_id in _download_tasks:
+        download_history_db.update_status_by_id(task_id, 'cancelled')
+        _download_tasks[task_id].update({
+            'status': 'cancelled',
+        })
+        
+        _cancelling_tasks.add(task_id)

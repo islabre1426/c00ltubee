@@ -1,7 +1,8 @@
 import { api, state } from "../main.js";
-import { handleDeleteHistory } from "./history.js";
+import { getHistory, handleDeleteHistory } from "./history.js";
 import { getLog } from "./log.js";
 import { toggleSidebar } from "./sidebar.js";
+import { startStatusPolling } from "./statusPolling.js";
 
 export function createDownloadCard(taskId, info) {
     const container = document.createElement('div');
@@ -104,6 +105,10 @@ export function updateDownloadCard(taskId, info) {
         case 'queued':
             statusText += 'Queued';
             break;
+        
+        case 'cancelled':
+            statusText += 'Cancelled';
+            break;
 
         default:
     }
@@ -130,13 +135,14 @@ export async function renderCardInfo(taskId, info) {
         <div class="log"></div>
     </main>
     <footer>
-        <button class="task-button"></button>
+        <button id="task-button" data-id="${taskId}"></button>
         <hr class="vr">
         <button id="delete-button" popovertarget="confirm-dialog">Delete</button>
     </footer>
     `;
 
     const deleteButton = document.getElementById('delete-button');
+    const taskButton = document.getElementById('task-button');
 
     const log = await getLog(taskId);
 
@@ -152,6 +158,33 @@ export async function renderCardInfo(taskId, info) {
         confirmDialogYesAction.dataset.action = 'delete-history';
         confirmDialogYesAction.dataset.id = taskId;
     });
+
+    taskButton.addEventListener('click', async () => await handleTaskButtonOperation());
+}
+
+async function handleTaskButtonOperation() {
+    const taskButton = document.getElementById('task-button');
+    const taskId = taskButton.dataset.id;
+
+    switch (taskButton.dataset.operation) {
+        case 'redownload':
+        case 'retry':
+            const history = await getHistory(taskId);
+            const url = history['url'];
+
+            await api.startDownload(url, taskId);
+
+            state.pollers[taskId] = await startStatusPolling(taskId);
+
+            await api.startWorker();
+
+            break;
+        
+        case 'cancel':
+            await api.cancelDownload(taskId);
+            
+            break;
+    }
 }
 
 export function updateCardInfo(taskId, info) {
@@ -160,7 +193,7 @@ export function updateCardInfo(taskId, info) {
     if (!cardInfo) return;
 
     const titleElement = cardInfo.querySelector('.title');
-    const taskButton = cardInfo.querySelector('.task-button');
+    const taskButton = document.getElementById('task-button');
     const deleteButton = cardInfo.querySelector('#delete-button');
 
     if (!titleElement || !taskButton || !deleteButton) return;
@@ -187,6 +220,7 @@ export function updateCardInfo(taskId, info) {
             break;
         
         case 'error':
+        case 'cancelled':
             taskButtonOperation = 'retry';
             taskButtonText = 'Retry';
             enableDelete = true;

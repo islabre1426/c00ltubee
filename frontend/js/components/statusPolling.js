@@ -9,7 +9,7 @@ export async function startStatusPolling(taskId) {
         const statusResponse = await api.getDownloadStatus(taskId);
         const log = await getLog(taskId);
         const statusInfo = statusResponse.info;
-        const stopPollingStatus = ['finished', 'error'];
+        const stopPollingStatus = ['finished', 'error', 'cancelled'];
 
         if (stopPollingStatus.includes(statusInfo.status)) {
             stopStatusPolling(taskId);

@@ -3,7 +3,7 @@ import { createDownloadCard, updateDownloadCard } from "./downloadCard.js";
 import { toggleSidebar } from "./sidebar.js";
 
 export async function populateHistory() {
-    const response = await api.getHistory();
+    const response = await api.getAllHistory();
     const history = response.history;
 
     history.forEach((entry) => {
@@ -15,6 +15,11 @@ export async function populateHistory() {
         createDownloadCard(entry['task_id'], info);
         updateDownloadCard(entry['task_id'], info);
     });
+}
+
+export async function getHistory(taskId) {
+    const response = await api.getHistory(taskId);
+    return response.history;
 }
 
 export async function handleDeleteHistory(taskId) {

@@ -23,13 +23,14 @@ class _DownloadHistory:
         self,
         task_id: str,
         title: str,
+        url: str,
         status_type: str,
         log_file_path: str | None = None,
     ):
         with self.db_connector as db:
             db.cursor.execute(
-                f'INSERT INTO {self.name} (task_id, title, status_type, log_file_path) VALUES (?, ?, ?, ?)',
-                (task_id, title, status_type, log_file_path),
+                f'INSERT INTO {self.name} (task_id, title, url, status_type, log_file_path) VALUES (?, ?, ?, ?, ?)',
+                (task_id, title, url, status_type, log_file_path),
             )
     
 
@@ -48,10 +49,24 @@ class _DownloadHistory:
             return result
     
 
+    def get_by_id_as_dict(self, task_id: str):
+        entry = self.get_by_id(task_id)
+
+        result = {
+            'task_id': entry[0],
+            'title': entry[1],
+            'url': entry[2],
+            'status_type': entry[3],
+            'log_file_path': entry[4],
+        }
+
+        return result
+    
+
     def get_log_file_path_by_id(self, task_id: str):
         history = self.get_by_id(task_id)
 
-        return history[3]
+        return history[4]
     
 
     def get_all_as_list(self):
@@ -66,8 +81,9 @@ class _DownloadHistory:
                 result.append({
                     'task_id': entry[0],
                     'title': entry[1],
-                    'status_type': entry[2],
-                    'log_file_path': entry[3],
+                    'url': entry[2],
+                    'status_type': entry[3],
+                    'log_file_path': entry[4],
                 })
 
             return result
@@ -77,13 +93,14 @@ class _DownloadHistory:
         self,
         task_id: str,
         title: str,
+        url: str,
         status_type: str,
         log_file_path: str | None = None
     ):
         with self.db_connector as db:
             db.cursor.execute(
-                f'UPDATE {self.name} SET title = ?, status_type = ?, log_file_path = ? WHERE task_id = ?',
-                (title, status_type, log_file_path, task_id),
+                f'UPDATE {self.name} SET title = ?, url = ?, status_type = ?, log_file_path = ? WHERE task_id = ?',
+                (title, url, status_type, log_file_path, task_id),
             )
     
 

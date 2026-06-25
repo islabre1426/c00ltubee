@@ -1,5 +1,3 @@
-from typing import Literal
-import os
 import webview
 
 import sys

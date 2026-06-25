@@ -5,6 +5,7 @@ CREATE TABLE history_status_type (
 CREATE TABLE download_history (
     task_id TEXT NOT NULL,
     title TEXT NOT NULL,
+    url TEXT NOT NULL,
     status_type TEXT NOT NULL,
     log_file_path TEXT NULL DEFAULT NULL,
 
@@ -13,4 +14,4 @@ CREATE TABLE download_history (
     UNIQUE (task_id)
 );
 
-INSERT INTO history_status_type (type) VALUES ('queued'), ('working'), ('finished'), ('error');
+INSERT INTO history_status_type (type) VALUES ('queued'), ('working'), ('finished'), ('error'), ('cancelled');

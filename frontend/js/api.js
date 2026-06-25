@@ -1,13 +1,15 @@
 export function attachApi() {
     return {
-        getHistory: async () => await fetchJson('/history'),
+        getAllHistory: async () => await fetchJson('/all-history'),
+        getHistory: async (id) => await fetchJson('/history', 'POST', { id: id }),
         deleteHistory: async (id) => await fetchJson('/delete-history', 'POST', { id: id }),
         deleteAllHistory: async () => await fetchJson('/delete-all-history'),
         extendSidebar: async (extend) => await fetchJson('/extend-sidebar', 'POST', { extend: extend }),
-        startDownload: async (url) => await fetchJson('/start-download', 'POST', { url: url }),
+        startDownload: async (url, taskId = null) => await fetchJson('/start-download', 'POST', { url: url, taskId: taskId }),
         startWorker: async () => await fetchJson('/start-worker'),
         getDownloadStatus: async (id) => await fetchJson('/status', 'POST', { id: id }),
         getLog: async (id) => await fetchJson('/log', 'POST', { id: id }),
+        cancelDownload: async (id) => await fetchJson('/cancel-download', 'POST', { id: id }),
         getSettings: async () => await fetchJson('/settings'),
         saveSetting: async (name, value) => await fetchJson('/save-setting', 'POST', { name: name, value: value }),
         folderPicker: async () => await fetchJson('/folder-picker'),
