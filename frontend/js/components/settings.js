@@ -41,8 +41,8 @@ function createSettingCard(name, type, value) {
             const isChecked = value === 'true' ? 'checked' : '';
 
             container.innerHTML += `
-            <input type="checkbox" name="value" ${isChecked}>
-            <label for="value">${value}</label>
+            <input type="checkbox" name="value" id="${name}-value" ${isChecked}>
+            <label for="${name}-value">${value}</label>
             `;
             break;
         
@@ -67,12 +67,20 @@ function createSettingCard(name, type, value) {
 
     switch (type) {
         case 'text':
-        case 'boolean':
             input.addEventListener('keydown', async (e) => {
                 if (e.key === 'Enter') {
                     await handleSettingChange(input, name)
                 }
             });
+            break;
+
+        case 'boolean':
+            input.addEventListener('click', async () => {
+                await handleSettingChange(input, name);
+
+                container.querySelector(`label[for="${name}-value"]`).textContent = input.checked;
+            });
+
             break;
         
         case 'location_folder':
