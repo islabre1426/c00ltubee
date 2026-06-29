@@ -13,8 +13,8 @@ export async function toggleSidebar(sidebarState) {
     sidebarMain.style.display = state.isSidebarExtended ? 'flex' : 'none';
     sidebarButton.textContent = state.isSidebarExtended ? '<' : '>';
 
-    if (sidebarMain.dataset.taskId !== undefined) {
-        const card = document.querySelector(`.download-card[data-task-id="${sidebarMain.dataset.taskId}"]`);
+    if (sidebarMain.dataset.id !== undefined) {
+        const card = document.querySelector(`.download-card[data-id="${sidebarMain.dataset.id}"]`);
 
         card.querySelector('.card-view').textContent = '>';
     }

@@ -4,10 +4,10 @@ import { getLog } from "./log.js";
 import { toggleSidebar } from "./sidebar.js";
 import { startStatusPolling } from "./statusPolling.js";
 
-export function createDownloadCard(taskId, info) {
+export function createDownloadCard(id, info) {
     const container = document.createElement('div');
     container.classList.add('download-card');
-    container.dataset.taskId = taskId;
+    container.dataset.id = id;
 
     container.innerHTML = `
     <div class="info">
@@ -24,17 +24,17 @@ export function createDownloadCard(taskId, info) {
 
     const cardViewButton = container.querySelector('.card-view');
 
-    cardViewButton.addEventListener('click', async () => await handleCardViewButton(taskId, info));
+    cardViewButton.addEventListener('click', async () => await handleCardViewButton(id, info));
 }
 
-async function handleCardViewButton(taskId, info) {
-    const card = document.querySelector(`.download-card[data-task-id="${taskId}"]`);
+async function handleCardViewButton(id, info) {
+    const card = document.querySelector(`.download-card[data-id="${id}"]`);
     const cardViewButton = card.querySelector('.card-view');
     const sidebarMain = document.getElementById('sidebar-main');
 
-    const viewingCardId = sidebarMain.dataset.taskId;
+    const viewingCardId = sidebarMain.dataset.id;
 
-    const isViewing = (state.isSidebarExtended && (viewingCardId === taskId)) ? true : false;
+    const isViewing = (state.isSidebarExtended && (viewingCardId === id)) ? true : false;
 
     if (!state.isSidebarExtended) {
         await toggleSidebar(true);
@@ -46,8 +46,8 @@ async function handleCardViewButton(taskId, info) {
         await toggleSidebar(false);
         cardViewButton.textContent = '>';
         return;
-    } else if (viewingCardId !== undefined && viewingCardId !== taskId) {
-        const previousViewingCard = document.querySelector(`.download-card[data-task-id="${viewingCardId}"]`);
+    } else if (viewingCardId !== undefined && viewingCardId !== id) {
+        const previousViewingCard = document.querySelector(`.download-card[data-id="${viewingCardId}"]`);
         previousViewingCard.querySelector('.card-view').textContent = '>';
         cardViewButton.textContent = '<';
     }
@@ -56,16 +56,16 @@ async function handleCardViewButton(taskId, info) {
     
     // Make sure card view info is updated even after finished downloading
     if (Object.keys(info).length === 0) {
-        const response = await api.getDownloadStatus(taskId);
+        const response = await api.getDownloadStatus(id);
         passedInfo = response.info;
     }
 
-    await renderCardInfo(taskId, passedInfo);
-    updateCardInfo(taskId, passedInfo);
+    await renderCardInfo(id, passedInfo);
+    updateCardInfo(id, passedInfo);
 }
 
-export function updateDownloadCard(taskId, info) {
-    const card = document.querySelector(`.download-card[data-task-id="${taskId}"]`);
+export function updateDownloadCard(id, info) {
+    const card = document.querySelector(`.download-card[data-id="${id}"]`);
 
     if (!card) return;
 
@@ -117,26 +117,26 @@ export function updateDownloadCard(taskId, info) {
     statusElement.textContent = statusText;
 }
 
-export async function renderCardInfo(taskId, info) {
+export async function renderCardInfo(id, info) {
     const sidebarMain = document.getElementById('sidebar-main');
 
     // Reset class list
     sidebarMain.className = '';
 
     sidebarMain.dataset.contentType = 'card-info';
-    sidebarMain.dataset.taskId = taskId;
+    sidebarMain.dataset.id = id;
     sidebarMain.classList.add('card-info-container');
 
     sidebarMain.innerHTML = `
     <header>
         <div class="title">${info['title'] ? info['title'] : 'Waiting...'}</div>
-        <div class="task-id">ID: ${taskId}</div>
+        <div class="task-id">ID: ${id}</div>
     </header>
     <main>
         <div class="log"></div>
     </main>
     <footer>
-        <button id="task-button" data-id="${taskId}"></button>
+        <button id="task-button" data-id="${id}"></button>
         <hr class="vr">
         <button id="delete-button" popovertarget="confirm-dialog">Delete</button>
     </footer>
@@ -145,19 +145,19 @@ export async function renderCardInfo(taskId, info) {
     const deleteButton = document.getElementById('delete-button');
     const taskButton = document.getElementById('task-button');
 
-    const log = await getLog(taskId);
+    const log = await getLog(id);
 
     if (log) {
-        updateLog(taskId, log);
+        updateLog(id, log);
     }
 
     deleteButton.addEventListener('click', () => {
         const confirmDialogYesAction = document.getElementById('confirm-yes');
         const confirmMessage = document.getElementById('confirm-message');
 
-        confirmMessage.textContent = `Are you sure to delete history id\n"${taskId}"?`;
+        confirmMessage.textContent = `Are you sure to delete history id\n"${id}"?`;
         confirmDialogYesAction.dataset.action = 'delete-history';
-        confirmDialogYesAction.dataset.id = taskId;
+        confirmDialogYesAction.dataset.id = id;
     });
 
     taskButton.addEventListener('click', async () => await handleTaskButtonOperation());
@@ -165,31 +165,31 @@ export async function renderCardInfo(taskId, info) {
 
 async function handleTaskButtonOperation() {
     const taskButton = document.getElementById('task-button');
-    const taskId = taskButton.dataset.id;
+    const id = taskButton.dataset.id;
 
     switch (taskButton.dataset.operation) {
         case 'redownload':
         case 'retry':
-            const history = await getHistory(taskId);
+            const history = await getHistory(id);
             const url = history['url'];
 
-            await api.startDownload(url, taskId);
+            await api.startDownload(url, id);
 
-            state.pollers[taskId] = await startStatusPolling(taskId);
+            state.pollers[id] = await startStatusPolling(id);
 
             await api.startWorker();
 
             break;
         
         case 'cancel':
-            await api.cancelDownload(taskId);
+            await api.cancelDownload(id);
             
             break;
     }
 }
 
-export function updateCardInfo(taskId, info) {
-    const cardInfo = document.querySelector(`#sidebar-main[data-content-type="card-info"][data-task-id="${taskId}"]`);
+export function updateCardInfo(id, info) {
+    const cardInfo = document.querySelector(`#sidebar-main[data-content-type="card-info"][data-id="${id}"]`);
 
     if (!cardInfo) return;
 
@@ -234,8 +234,8 @@ export function updateCardInfo(taskId, info) {
     deleteButton.disabled = enableDelete ? false : true;
 }
 
-export function updateLog(taskId, log) {
-    const cardInfo = document.querySelector(`#sidebar-main[data-content-type="card-info"][data-task-id="${taskId}"]`);
+export function updateLog(id, log) {
+    const cardInfo = document.querySelector(`#sidebar-main[data-content-type="card-info"][data-id="${id}"]`);
 
     if (!cardInfo) return;
 

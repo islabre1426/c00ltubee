@@ -1,17 +1,18 @@
 export function attachApi() {
     return {
-        getAllHistory: async () => await fetchJson('/all-history'),
-        getHistory: async (id) => await fetchJson('/history', 'POST', { id: id }),
-        deleteHistory: async (id) => await fetchJson('/delete-history', 'POST', { id: id }),
-        deleteAllHistory: async () => await fetchJson('/delete-all-history'),
+        getHistory: async (id) => await fetchJson(`/history/get/${id}`),
+        deleteHistory: async (id) => await fetchJson(`/history/delete/${id}`),
+
+        startDownload: async (url, id = null) => await fetchJson('/downloader/start/download', 'POST', { url: url, id: id }),
+        startWorker: async () => await fetchJson('/downloader/start/worker'),
+        getDownloadStatus: async (id) => await fetchJson(`/downloader/get/status/${id}`),
+        getLog: async (id) => await fetchJson(`/downloader/get/log/${id}`),
+        cancelDownload: async (id) => await fetchJson(`/downloader/cancel/${id}`),
+
+        getSettings: async () => await fetchJson('/setting/get/all'),
+        saveSetting: async (name, value) => await fetchJson('/setting/save', 'POST', { name: name, value: value }),
+
         extendSidebar: async (extend) => await fetchJson('/extend-sidebar', 'POST', { extend: extend }),
-        startDownload: async (url, taskId = null) => await fetchJson('/start-download', 'POST', { url: url, taskId: taskId }),
-        startWorker: async () => await fetchJson('/start-worker'),
-        getDownloadStatus: async (id) => await fetchJson('/status', 'POST', { id: id }),
-        getLog: async (id) => await fetchJson('/log', 'POST', { id: id }),
-        cancelDownload: async (id) => await fetchJson('/cancel-download', 'POST', { id: id }),
-        getSettings: async () => await fetchJson('/settings'),
-        saveSetting: async (name, value) => await fetchJson('/save-setting', 'POST', { name: name, value: value }),
         folderPicker: async () => await fetchJson('/folder-picker'),
     }
 }

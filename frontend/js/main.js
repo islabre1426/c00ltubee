@@ -1,6 +1,6 @@
 import { attachApi } from "./api.js";
 import { handleAddUrlsButton } from "./components/addUrls.js";
-import { handleDeleteAllHistory, handleDeleteHistory, populateHistory } from "./components/history.js";
+import { handleDeleteHistory, populateHistory } from "./components/history.js";
 import { changePage } from "./components/navigation.js";
 import { createAllSettingCards } from "./components/settings.js";
 import { toggleSidebar } from "./components/sidebar.js";
@@ -38,7 +38,7 @@ clearHistoryButton.addEventListener('click', () => {
 confirmDialogYesAction.addEventListener('click', async () => {
     switch (confirmDialogYesAction.dataset.action) {
         case 'delete-all-history':
-            await handleDeleteAllHistory();
+            await handleDeleteHistory('all');
             break;
         case 'delete-history':
             await handleDeleteHistory(confirmDialogYesAction.dataset.id);

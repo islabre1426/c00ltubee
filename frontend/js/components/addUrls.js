@@ -41,12 +41,11 @@ async function handleDownload() {
 
     for (const url of urls) {
         const response = await api.startDownload(url);
+        const id = response.id;
 
-        const taskId = response.taskId;
+        createDownloadCard(id, {});
 
-        createDownloadCard(taskId, {});
-
-        state.pollers[taskId] = await startStatusPolling(taskId);
+        state.pollers[id] = await startStatusPolling(id);
     }
 
     await api.startWorker();
@@ -79,12 +78,12 @@ export async function handleAddUrlsButton() {
             await toggleSidebar(false);
         }
 
-        if (sidebarMain.dataset.taskId) {
-            const card = document.querySelector(`.download-card[data-task-id="${sidebarMain.dataset.taskId}"]`);
+        if (sidebarMain.dataset.id) {
+            const card = document.querySelector(`.download-card[data-id="${sidebarMain.dataset.id}"]`);
 
             card.querySelector('.card-view').textContent = '>';
 
-            sidebarMain.removeAttribute('data-task-id');
+            sidebarMain.removeAttribute('data-id');
         }
 
         return;
@@ -94,12 +93,12 @@ export async function handleAddUrlsButton() {
         renderAddUrlsUI();
     }
 
-    if (sidebarMain.dataset.taskId) {
-        const card = document.querySelector(`.download-card[data-task-id="${sidebarMain.dataset.taskId}"]`);
+    if (sidebarMain.dataset.id) {
+        const card = document.querySelector(`.download-card[data-id="${sidebarMain.dataset.id}"]`);
 
         card.querySelector('.card-view').textContent = '>';
 
-        sidebarMain.removeAttribute('data-task-id');
+        sidebarMain.removeAttribute('data-id');
     }
 
     await toggleSidebar(true);

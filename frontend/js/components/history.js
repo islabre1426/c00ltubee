@@ -3,8 +3,7 @@ import { createDownloadCard, updateDownloadCard } from "./downloadCard.js";
 import { toggleSidebar } from "./sidebar.js";
 
 export async function populateHistory() {
-    const response = await api.getAllHistory();
-    const history = response.history;
+    const history = await getHistory('all');
 
     history.forEach((entry) => {
         const info = {
@@ -17,28 +16,24 @@ export async function populateHistory() {
     });
 }
 
-export async function getHistory(taskId) {
-    const response = await api.getHistory(taskId);
+export async function getHistory(id) {
+    const response = await api.getHistory(id);
+
     return response.history;
 }
 
-export async function handleDeleteHistory(taskId) {
+export async function handleDeleteHistory(id) {
     const contentMain = document.querySelector('.content-main[data-page="Home"] main');
-    const deletedCard = contentMain.querySelector(`.download-card[data-task-id="${taskId}"]`);
+    const deletedCard = contentMain.querySelector(`.download-card[data-id="${id}"]`);
 
-    await api.deleteHistory(taskId);
+    await api.deleteHistory(id);
 
-    contentMain.removeChild(deletedCard);
-    cleanupSidebar();
-    await toggleSidebar(false);
-}
+    if (id === 'all') {
+        contentMain.innerHTML = '';
+    } else {
+        contentMain.removeChild(deletedCard);
+    }
 
-export async function handleDeleteAllHistory() {
-    const contentMain = document.querySelector('.content-main[data-page="Home"] main');
-
-    await api.deleteAllHistory();
-
-    contentMain.innerHTML = '';
     cleanupSidebar();
     await toggleSidebar(false);
 }
@@ -48,5 +43,5 @@ function cleanupSidebar() {
 
     sidebarMain.innerHTML = '';
     sidebarMain.className = '';
-    ['data-content-type', 'data-task-id'].forEach((attr) => sidebarMain.removeAttribute(attr));
+    ['data-content-type', 'data-id'].forEach((attr) => sidebarMain.removeAttribute(attr));
 }

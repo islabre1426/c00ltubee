@@ -4,22 +4,22 @@ import { getLog } from "./log.js";
 
 const delayMs = 250;
 
-export async function startStatusPolling(taskId) {
+export async function startStatusPolling(id) {
     return setInterval(async () => {
-        const statusResponse = await api.getDownloadStatus(taskId);
-        const log = await getLog(taskId);
+        const statusResponse = await api.getDownloadStatus(id);
+        const log = await getLog(id);
         const statusInfo = statusResponse.info;
         const stopPollingStatus = ['finished', 'error', 'cancelled'];
 
         if (stopPollingStatus.includes(statusInfo.status)) {
-            stopStatusPolling(taskId);
+            stopStatusPolling(id);
         }
 
-        updateDownloadCard(taskId, statusInfo);
-        updateCardInfo(taskId, statusInfo);
+        updateDownloadCard(id, statusInfo);
+        updateCardInfo(id, statusInfo);
 
         if (log) {
-            updateLog(taskId, log);
+            updateLog(id, log);
         }
     }, delayMs);
 }
