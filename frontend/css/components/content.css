@@ -1,0 +1,155 @@
+#content {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#content header {
+    text-align: center;
+}
+
+#content header nav {
+    display: grid;
+    grid-template-columns: 1fr var(--border-width) 2fr var(--border-width) 1fr;
+
+    border: var(--border);
+    border-width: var(--border-width) 0;
+}
+
+hr {
+    border: 0;
+    margin: 0;
+}
+
+hr.vr {
+    border-right: var(--border);
+    height: 100%;
+}
+
+.content-main {
+    display: none;
+    flex-direction: column;
+
+    height: 100%;
+    min-height: 0;
+}
+
+.content-main.active {
+    display: flex;
+}
+
+.content-main main {
+    height: 100%;
+    font-size: var(--font-md);
+    overflow-y: auto;
+
+    container-type: scroll-state;
+    container-name: content-main;
+}
+
+.download-card {
+    display: flex;
+
+    border-bottom: var(--border);
+}
+
+.download-card .info {
+    padding: 0.25rem;
+    width: 75%;
+}
+
+.download-card .status {
+    font-size: var(--font-sm);
+}
+
+.download-card .operations {
+    width: 25%;
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.download-card .operations button {
+    height: 100%;
+
+    border-left: var(--border);
+}
+
+.download-card .operations span {
+    padding-right: 0.25rem;
+}
+
+.content-main footer {
+    border-top: var(--border);
+}
+
+.footer-buttons {
+    display: grid;
+    grid-template-columns: 1fr var(--border-width) 1fr;
+}
+
+.content-main[data-page="Settings"] main {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+
+    height: initial;
+}
+
+.setting-card {
+    display: flex;
+    flex-direction: column;
+
+    text-align: center;
+    border-bottom: var(--border);
+}
+
+.setting-card:nth-child(odd) {
+    border-right: var(--border);
+}
+
+.setting-card > *, .setting-card.empty {
+    width: 100%;
+}
+
+.setting-card .name {
+    border-bottom: var(--border);
+}
+
+.setting-card input[type="text"], .setting-card input[type="button"] {
+    background: inherit;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    border: 0;
+
+    text-align: center;
+}
+
+input[type="button"], input[type="checkbox"] + label {
+    cursor: pointer;
+}
+
+.setting-card input[type="checkbox"] {
+    display: none;
+}
+
+input[type="checkbox"] + label {
+    padding: 1px;
+}
+
+input[type="text"]:hover, input[type="checkbox"] + label:hover, input[type="button"]:hover {
+    background-color: var(--hover-color);
+}
+
+@container content-main scroll-state(scrollable: y) {
+    .download-card:last-child {
+        border-bottom: 0;
+    }
+
+    .download-card .operations button {
+        border-right: var(--border);
+    }
+}

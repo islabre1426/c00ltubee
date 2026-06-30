@@ -1,0 +1,76 @@
+#sidebar {
+    display: flex;
+}
+
+#sidebar-main, #sidebar-button {
+    border-left: var(--border);
+}
+
+#sidebar-main {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+}
+
+.add-urls-container header {
+    text-align: center;
+}
+
+.add-urls-container main, .card-info-container main {
+    height: 100%;
+    border: var(--border);
+    border-width: var(--border-width) 0;
+    font-size: 1rem;
+}
+
+.card-info-container main {
+    overflow-y: auto;
+}
+
+.add-urls-container textarea {
+    width: 100%;
+    height: 100%;
+    background-color: inherit;
+    color: inherit;
+    font-size: inherit;
+    font-family: inherit;
+    padding: 0.25rem;
+
+    resize: none;
+    border: 0;
+}
+
+.add-urls-container footer {
+    text-align: center;
+}
+
+.add-urls-container button, .card-info-container button {
+    width: 100%;
+}
+
+.card-info-container {
+    font-size: var(--font-md);
+}
+
+.card-info-container header, .card-info-container .log {
+    padding: 0.25rem;
+}
+
+.card-info-container .task-id {
+    font-size: var(--font-sm);
+}
+
+.card-info-container .log {
+    white-space: pre-wrap;
+}
+
+.card-info-container footer {
+    font-size: var(--font-lg);
+
+    display: grid;
+    grid-template-columns: 1fr var(--border-width) 1fr;
+}
+
+#sidebar-button {
+    height: 100%;
+}
