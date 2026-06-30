@@ -4,6 +4,8 @@ import sys
 
 from backend.app import app
 from util.util import current_os
+from database.download_history import download_history_db
+from database.setting import setting_db
 
 
 def _get_preferred_renderer():
@@ -39,6 +41,12 @@ def main(args: list[str]):
         debug = debug_flag,
         gui = renderer,
     )
+
+    # 
+    # Cleanup
+    # 
+    download_history_db.db_handler.close()
+    setting_db.db_handler.close()
 
 
 if __name__ == '__main__':

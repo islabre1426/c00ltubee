@@ -1,22 +1,30 @@
-from database.connector import DBConnector
+from database.handler import DBHandler
 
 
-class _DownloadHistory:
+class DownloadHistory:
     def __init__(self):
         self.name = 'download_history'
-        self.db_connector = DBConnector(self.name)
+        self.db_handler = DBHandler(self.name)
 
         self.init()
     
 
     def init(self):
-        if not self.db_connector.db_exists():
+        if not self.db_handler.db_exists():
             print(f'{self.name} database does not exist. Initializing.')
 
-            with self.db_connector as db:
-                db.load_sql_file(self.name)
+            # Connect to initialize database
+            self.db_handler.connect()
+            self.db_handler.load_sql_file(self.name)
+
         else:
             print(f'{self.name} database already exists. Skipping initialization.')
+
+            # Connect to use existing database
+            self.db_handler.connect()
+
+        # Shorthand for faster reference
+        self.connection = self.db_handler.connection
 
 
     def add(
@@ -27,64 +35,58 @@ class _DownloadHistory:
         status_type: str,
         log_file_path: str | None = None,
     ):
-        with self.db_connector as db:
-            db.cursor.execute(
+        with self.connection as conn:
+            conn.execute(
                 f'INSERT INTO {self.name} (task_id, title, url, status_type, log_file_path) VALUES (?, ?, ?, ?, ?)',
                 (task_id, title, url, status_type, log_file_path),
             )
     
 
     def get_by_id(self, task_id: str):
-        with self.db_connector as db:
-            db.cursor.execute(
+        with self.connection as conn:
+            cursor = conn.execute(
                 f'SELECT * FROM {self.name} WHERE task_id = ?',
                 (task_id,),
             )
 
-            result = db.cursor.fetchone()
+            result = cursor.fetchone()
 
             if result is None:
                 raise ValueError('Task not found:', task_id)
             
             return result
+        
+    
+    def format_row_as_dict(self, row):
+        return {
+            'task_id': row[0],
+            'title': row[1],
+            'url': row[2],
+            'status_type': row[3],
+            'log_file_path': row[4],
+        }
     
 
     def get_by_id_as_dict(self, task_id: str):
-        entry = self.get_by_id(task_id)
+        row = self.get_by_id(task_id)
 
-        result = {
-            'task_id': entry[0],
-            'title': entry[1],
-            'url': entry[2],
-            'status_type': entry[3],
-            'log_file_path': entry[4],
-        }
-
-        return result
+        return self.format_row_as_dict(row)
     
 
     def get_log_file_path_by_id(self, task_id: str):
-        history = self.get_by_id(task_id)
+        history = self.get_by_id_as_dict(task_id)
 
-        return history[4]
+        log_file_path = history.get('log_file_path')
+        
+        return log_file_path
     
 
     def get_all_as_list(self):
-        with self.db_connector as db:
-            db.cursor.execute(
-                f'SELECT * FROM {self.name}',
-            )
-
+        with self.connection as conn:
             result: list[dict] = []
 
-            for entry in db.cursor.fetchall():
-                result.append({
-                    'task_id': entry[0],
-                    'title': entry[1],
-                    'url': entry[2],
-                    'status_type': entry[3],
-                    'log_file_path': entry[4],
-                })
+            for row in conn.execute(f'SELECT * FROM {self.name}'):
+                result.append(self.format_row_as_dict(row))
 
             return result
     
@@ -97,8 +99,8 @@ class _DownloadHistory:
         status_type: str,
         log_file_path: str | None = None
     ):
-        with self.db_connector as db:
-            db.cursor.execute(
+        with self.connection as conn:
+            conn.execute(
                 f'UPDATE {self.name} SET title = ?, url = ?, status_type = ?, log_file_path = ? WHERE task_id = ?',
                 (title, url, status_type, log_file_path, task_id),
             )
@@ -109,26 +111,26 @@ class _DownloadHistory:
         task_id: str,
         status_type: str,
     ):
-        with self.db_connector as db:
-            db.cursor.execute(
+        with self.connection as conn:
+            conn.execute(
                 f'UPDATE {self.name} SET status_type = ? WHERE task_id = ?',
                 (status_type, task_id),
             )
     
 
     def delete_by_id(self, task_id: str):
-        with self.db_connector as db:
-            db.cursor.execute(
+        with self.connection as conn:
+            conn.execute(
                 f'DELETE FROM {self.name} WHERE task_id = ?',
                 (task_id,),
             )
     
 
     def delete_all(self):
-        with self.db_connector as db:
-            db.cursor.execute(
+        with self.connection as conn:
+            conn.execute(
                 f'DELETE FROM {self.name}',
             )
 
 
-download_history_db = _DownloadHistory()
+download_history_db = DownloadHistory()
