@@ -10,52 +10,48 @@ from database.download_history import download_history_db
 from util.util import get_app_data_location
 
 
-_queue = Queue()
-_download_tasks = {}
-_cancelling_tasks = set()
-_app_data_location = get_app_data_location()
+download_queue = Queue()
+download_tasks = {}
+cancelling_tasks = set()
 
 
 class Logger:
-    def __init__(self, task_id: str):
+    def __init__(self, id: str):
         today = datetime.now().strftime('%Y-%m-%d')
 
-        self.log_path = Path(_app_data_location, 'logs', today, f'{task_id}.log')
+        self.log_path = Path(get_app_data_location(), 'logs', today, f'{id}.log')
     
 
-    def _write_log(self, msg: str):
+    def write_log(self, msg: str):
         log_path_parent = self.log_path.parent
 
         if not log_path_parent.exists():
             log_path_parent.mkdir(parents = True)
         
+        # Without encoding format, non-English message will look weird
         with self.log_path.open(mode = 'a', encoding = 'utf-8') as f:
             f.write(msg + '\n')
     
 
     def debug(self, msg: str):
-        self._write_log(msg)
+        self.write_log(msg)
     
 
     def warning(self, msg: str):
-        self._write_log(msg)
+        self.write_log(msg)
 
     
     def error(self, msg: str):
-        self._write_log(msg)
+        self.write_log(msg)
 
 
-def _on_task_error(task_id: str):
-    download_history_db.update_status_by_id(
-        task_id, 'error',
-    )
+def on_task_error(id: str):
+    download_history_db.update_status_by_id(id, 'error')
 
-    _download_tasks[task_id].update({
-        'status': 'error',
-    })
+    download_tasks[id].update({ 'status': 'error' })
 
 
-def _on_task_success(task_id: str, title: str | None = None, url: str | None = None):
+def on_task_success(id: str, title: str | None = None, url: str | None = None):
     task = {
         'status': 'finished',
         'progress': 100,
@@ -63,39 +59,36 @@ def _on_task_success(task_id: str, title: str | None = None, url: str | None = N
 
     if title and url:
         download_history_db.update_by_id(
-            task_id,
+            id,
             title,
             url,
             'finished',
         )
 
-        task.update({
-            'title': title,
-        })
+        task.update({ 'title': title })
 
     else:
-        download_history_db.update_status_by_id(
-            task_id,
-            'finished',
-        )
+        download_history_db.update_status_by_id(id, 'finished')
 
-    _download_tasks[task_id].update(task)
+    download_tasks[id].update(task)
 
 
-def _on_task_cancelled(task_id: str):
-    download_history_db.update_status_by_id(task_id, 'cancelled')
+def handle_cancelling(id: str):
+    download_history_db.update_status_by_id(id, 'cancelled')
 
-    _download_tasks[task_id].update({
-        'status': 'cancelled',
-    })
-
-    _cancelling_tasks.discard(task_id)
+    download_tasks[id].update({ 'status': 'cancelled' })
 
 
-def _create_hook(task_id: str):
-    def _hooks(d: dict):
-        if task_id in _cancelling_tasks:
-            raise Exception(f'Task {task_id} cancelled by user')
+def on_task_cancelled(id: str):
+    handle_cancelling(id)
+
+    cancelling_tasks.discard(id)
+
+
+def create_hook(id: str):
+    def hooks(d: dict):
+        if id in cancelling_tasks:
+            raise Exception(f'Task {id} cancelled by user')
 
         status = d.get('status')
 
@@ -106,22 +99,22 @@ def _create_hook(task_id: str):
                 downloaded_bytes = d.get('downloaded_bytes', 0)
                 percentage = (downloaded_bytes / total * 100) if total > 0 else 0
 
-                _download_tasks[task_id].update({
+                download_tasks[id].update({
                     'status': 'downloading',
                     'progress': round(percentage, 2),
                 })
                 
             case 'finished':
-                _on_task_success(task_id)
+                on_task_success(id)
             
             case 'error':
-                _on_task_error(task_id)
+                on_task_error(id)
                 
     
-    return _hooks
+    return hooks
 
 
-def _download_video(opts: dict, task_id: str, url: str, log_file_path: str):
+def download_video(opts: dict, id: str, url: str, log_file_path: str):
     try:
         with YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download = False)
@@ -132,23 +125,23 @@ def _download_video(opts: dict, task_id: str, url: str, log_file_path: str):
             output_filename = Path(ydl.prepare_filename(info))
 
             if output_filename.exists():
-                _on_task_success(task_id, title)
+                on_task_success(id, title)
                 return
             
             # Support cancelling before the actual download
-            if task_id in _cancelling_tasks:
-                _on_task_cancelled(task_id)
+            if id in cancelling_tasks:
+                on_task_cancelled(id)
                 return
 
             download_history_db.update_by_id(
-                task_id,
+                id,
                 title,
                 url,
                 'working',
                 log_file_path
             )
 
-            _download_tasks[task_id].update({
+            download_tasks[id].update({
                 'status': 'starting',
                 'title': title,
                 'progress': 0,
@@ -158,68 +151,69 @@ def _download_video(opts: dict, task_id: str, url: str, log_file_path: str):
 
     except Exception:
         # Exception caused by intentional cancellation
-        if task_id in _cancelling_tasks:
-            _on_task_cancelled(task_id)
+        if id in cancelling_tasks:
+            on_task_cancelled(id)
+            
         else:
-            _on_task_error(task_id)
+            on_task_error(id)
             raise
 
 
 def start_worker():
     while True:
-        if _queue.empty():
+        if download_queue.empty():
             break
 
-        task = _queue.get()
+        task = download_queue.get()
 
-        task_id, url = task
+        id, url = task
 
-        logger = Logger(task_id)
+        logger = Logger(id)
 
         ydl_opts = {
             **get_downloader_opts(),
-            'progress_hooks': [_create_hook(task_id)],
+            'progress_hooks': [create_hook(id)],
             'logger': logger,
         }
 
         task_process = threading.Thread(
-            target = _download_video,
-            args = (ydl_opts, task_id, url, str(logger.log_path)),
+            target = download_video,
+            args = (ydl_opts, id, url, str(logger.log_path)),
             daemon = True,
-            name = task_id,
+            name = id,
         )
 
         task_process.start()
 
 
-def add_task_to_queue(task_id: str, url: str):
-    task = (task_id, url)
-    _queue.put(task)
+def add_task_to_queue(id: str, url: str):
+    task = (id, url)
+    download_queue.put(task)
 
+    # Find existing history (applicable for redownloading)
     try:
-        _ = download_history_db.get_by_id(task_id)
+        _ = download_history_db.get_by_id(id)
+
     except:
         download_history_db.add(
-            task_id,
+            id,
             'Waiting...',
             url,
             'queued',
         )
 
-    _download_tasks[task_id] = {
+    download_tasks[id] = {
         'status': 'queued'
     }
 
 
-def get_task_info(task_id: str) -> dict:
-    return _download_tasks[task_id]
+def get_task_info(id: str) -> dict | None:
+    return download_tasks.get(id)
 
 
-def cancel_task(task_id: str):
-    if task_id in _download_tasks:
-        download_history_db.update_status_by_id(task_id, 'cancelled')
-        _download_tasks[task_id].update({
-            'status': 'cancelled',
-        })
+def cancel_task(id: str):
+    if id in download_tasks:
+        # Handle early cancelling
+        handle_cancelling(id)
         
-        _cancelling_tasks.add(task_id)
+        cancelling_tasks.add(id)

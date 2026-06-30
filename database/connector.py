@@ -12,7 +12,11 @@ class DBConnector:
     
 
     def __enter__(self):
-        self.connection = sqlite3.connect(self.db_path)
+        # Reference: https://ricardoanderegg.com/posts/python-sqlite-thread-safety/
+        # Resolve issue with SQLite only allow same-thread object use
+        check_same_thread = False if sqlite3.threadsafety == 3 else True
+
+        self.connection = sqlite3.connect(self.db_path, check_same_thread = check_same_thread)
         self.cursor = self.connection.cursor()
 
         self._setup_db()

@@ -76,7 +76,7 @@ def start_download():
     req_id = request.json['id']
 
     if url is None:
-        abort(404, 'urls not found')
+        abort(404, 'url not found')
     
     # Assign task before the UI starts polling
     if req_id is None:
@@ -115,6 +115,9 @@ def get_download_status(id):
         abort(406, 'Invalid id sent')
     
     info = downloader.get_task_info(id)
+
+    if info is None:
+        abort(404, 'Status not found')
 
     response = {
         'status': 'success',
