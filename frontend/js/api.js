@@ -27,12 +27,8 @@ async function fetchJson(url, method = 'GET', body = null) {
             }
         })
 
-        if (!response.ok) {
-            throw new Error(`${method} ${url} status ${response.status} with message: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        return result;
+        return await response.json();
+        
     } catch (err) {
         throw err;
     }

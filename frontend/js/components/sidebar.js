@@ -1,8 +1,22 @@
 import { api, state } from '../main.js';
 
+export function handleSidebarButton() {
+    const sidebarButton = document.getElementById('sidebar-button');
+
+    if (!sidebarButton) {
+        throw new Error('sidebarButton not found');
+    }
+
+    sidebarButton.addEventListener('click', async () => await toggleSidebar(!state.isSidebarExtended));
+}
+
 export async function toggleSidebar(sidebarState) {
     const sidebarMain = document.getElementById('sidebar-main');
     const sidebarButton = document.getElementById('sidebar-button');
+
+    if (!sidebarMain || !sidebarButton) {
+        throw new Error('sidebarMain or sidebarButton not found');
+    }
 
     state.isSidebarExtended = sidebarState;
     const newWidth = Math.floor(window.innerWidth * 0.5);
@@ -13,9 +27,21 @@ export async function toggleSidebar(sidebarState) {
     sidebarMain.style.display = state.isSidebarExtended ? 'flex' : 'none';
     sidebarButton.textContent = state.isSidebarExtended ? '<' : '>';
 
-    if (sidebarMain.dataset.id !== undefined) {
-        const card = document.querySelector(`.download-card[data-id="${sidebarMain.dataset.id}"]`);
+    const id = sidebarMain.dataset.id;
 
-        card.querySelector('.card-view').textContent = '>';
+    if (id !== undefined) {
+        const card = document.querySelector(`.download-card[data-id="${id}"]`);
+
+        if (!card) {
+            throw new Error(`card id ${id} not found`);
+        }
+
+        const cardView = card.querySelector('.card-view');
+
+        if (!cardView) {
+            throw new Error(`card view of id ${id} not found`);
+        }
+
+        cardView.textContent = '>';
     }
 }
