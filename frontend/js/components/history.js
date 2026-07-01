@@ -1,6 +1,7 @@
 import { api } from "../main.js";
+import { setupDialog } from "./dialog.js";
 import { createDownloadCard, updateDownloadCard } from "./downloadCard.js";
-import { toggleSidebar } from "./sidebar.js";
+import { cleanupSidebar, toggleSidebar } from "./sidebar.js";
 
 export async function populateHistory() {
     const history = await getHistory('all');
@@ -24,13 +25,22 @@ export async function getHistory(id) {
 
 export async function handleDeleteHistory(id) {
     const contentMain = document.querySelector('.content-main[data-page="Home"] main');
-    const deletedCard = contentMain.querySelector(`.download-card[data-id="${id}"]`);
+
+    if (!contentMain) {
+        throw new Error('contentMain not found');
+    }
 
     await api.deleteHistory(id);
 
     if (id === 'all') {
         contentMain.innerHTML = '';
     } else {
+        const deletedCard = contentMain.querySelector(`.download-card[data-id="${id}"]`);
+
+        if (!deletedCard) {
+            throw new Error(`deletedCard id ${id} not found`);
+        }
+
         contentMain.removeChild(deletedCard);
     }
 
@@ -38,10 +48,15 @@ export async function handleDeleteHistory(id) {
     await toggleSidebar(false);
 }
 
-function cleanupSidebar() {
-    const sidebarMain = document.getElementById('sidebar-main');
+export function handleClearHistoryButton() {
+    const clearHistoryButton = document.getElementById('clear-history-button');
 
-    sidebarMain.innerHTML = '';
-    sidebarMain.className = '';
-    ['data-content-type', 'data-id'].forEach((attr) => sidebarMain.removeAttribute(attr));
+    if (!clearHistoryButton) {
+        throw new Error('clearHistoryButton not found');
+    }
+
+    clearHistoryButton.addEventListener('click', () => setupDialog(
+        'Are you sure to delete all history?',
+        'delete-all-history',
+    ));
 }

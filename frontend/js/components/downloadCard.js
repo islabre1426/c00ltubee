@@ -1,4 +1,5 @@
 import { api, state } from "../main.js";
+import { setupDialog } from "./dialog.js";
 import { getHistory, handleDeleteHistory } from "./history.js";
 import { getLog } from "./log.js";
 import { toggleSidebar } from "./sidebar.js";
@@ -151,14 +152,11 @@ export async function renderCardInfo(id, info) {
         updateLog(id, log);
     }
 
-    deleteButton.addEventListener('click', () => {
-        const confirmDialogYesAction = document.getElementById('confirm-yes');
-        const confirmMessage = document.getElementById('confirm-message');
-
-        confirmMessage.textContent = `Are you sure to delete history id\n"${id}"?`;
-        confirmDialogYesAction.dataset.action = 'delete-history';
-        confirmDialogYesAction.dataset.id = id;
-    });
+    deleteButton.addEventListener('click', () => setupDialog(
+        `Are you sure to delete history id\n"${id}"?`,
+        'delete-history',
+        id,
+    ));
 
     taskButton.addEventListener('click', async () => await handleTaskButtonOperation());
 }

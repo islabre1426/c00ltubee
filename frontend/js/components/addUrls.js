@@ -67,15 +67,37 @@ function handleAddUrlsUI(interactionDisabled) {
 }
 
 export async function handleAddUrlsButton() {
-    const sidebarMain = document.getElementById('sidebar-main');
-    const currentContentType = sidebarMain.dataset.contentType;
+    const addUrlsButton = document.getElementById('add-urls-button');
 
-    if (state.isSidebarExtended) {
-        if (!currentContentType || currentContentType === '' || currentContentType !== 'add-urls') {
+    if (!addUrlsButton) {
+        throw new Error('addUrlsButton not found');
+    }
+
+    addUrlsButton.addEventListener('click', async () => {
+        const sidebarMain = document.getElementById('sidebar-main');
+        const currentContentType = sidebarMain.dataset.contentType;
+
+        if (state.isSidebarExtended) {
+            if (!currentContentType || currentContentType === '' || currentContentType !== 'add-urls') {
+                renderAddUrlsUI();
+            
+            } else if (currentContentType === 'add-urls') {
+                await toggleSidebar(false);
+            }
+
+            if (sidebarMain.dataset.id) {
+                const card = document.querySelector(`.download-card[data-id="${sidebarMain.dataset.id}"]`);
+
+                card.querySelector('.card-view').textContent = '>';
+
+                sidebarMain.removeAttribute('data-id');
+            }
+
+            return;
+        }
+
+        if (currentContentType !== 'add-urls') {
             renderAddUrlsUI();
-        
-        } else if (currentContentType === 'add-urls') {
-            await toggleSidebar(false);
         }
 
         if (sidebarMain.dataset.id) {
@@ -86,20 +108,6 @@ export async function handleAddUrlsButton() {
             sidebarMain.removeAttribute('data-id');
         }
 
-        return;
-    }
-
-    if (currentContentType !== 'add-urls') {
-        renderAddUrlsUI();
-    }
-
-    if (sidebarMain.dataset.id) {
-        const card = document.querySelector(`.download-card[data-id="${sidebarMain.dataset.id}"]`);
-
-        card.querySelector('.card-view').textContent = '>';
-
-        sidebarMain.removeAttribute('data-id');
-    }
-
-    await toggleSidebar(true);
+        await toggleSidebar(true);
+    });
 }

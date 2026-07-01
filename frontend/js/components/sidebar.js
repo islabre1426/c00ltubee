@@ -45,3 +45,15 @@ export async function toggleSidebar(sidebarState) {
         cardView.textContent = '>';
     }
 }
+
+export function cleanupSidebar() {
+    const sidebarMain = document.getElementById('sidebar-main');
+
+    if (!sidebarMain) {
+        throw new Error('sidebarMain not found');
+    }
+
+    sidebarMain.innerHTML = '';
+    sidebarMain.className = '';
+    ['data-content-type', 'data-id'].forEach((attr) => sidebarMain.removeAttribute(attr));
+}
