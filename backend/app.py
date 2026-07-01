@@ -181,9 +181,8 @@ def save_setting():
     value = request.json['value']
 
     # We expect boolean value to be 'true' or 'false', so we need to explicitly convert it
-    value = 'true' if value == True else 'false'
-
-    print(value)
+    if type(value) == bool:
+        value = 'true' if value == True else 'false'
 
     setting_db.update_user_value_by_name(name, value)
 
