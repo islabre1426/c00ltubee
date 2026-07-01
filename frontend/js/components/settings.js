@@ -69,7 +69,9 @@ function createSettingCard(name, type, value) {
         case 'text':
             input.addEventListener('keydown', async (e) => {
                 if (e.key === 'Enter') {
-                    await handleSettingChange(input, name)
+                    await handleSettingChange(input, name);
+                } else if (e.key === 'Escape') {
+                    input.value = value;
                 }
             });
             break;
@@ -89,6 +91,8 @@ function createSettingCard(name, type, value) {
                 const selectedFolder = picker['selectedFolder'];
 
                 await handleSettingChange(input, name, selectedFolder);
+
+                input.value = selectedFolder;
             })
             break;
     }
