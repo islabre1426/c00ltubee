@@ -13,8 +13,6 @@ class Setting:
 
     def init(self):
         if not self.db_handler.db_exists():
-            print(f'{self.name} database does not exist. Initializing.')
-
             # Connect to initialize database
             self.db_handler.connect()
             self.db_handler.load_sql_file(self.name)
@@ -29,8 +27,6 @@ class Setting:
                 )
 
         else:
-            print(f'{self.name} database already exists. Skipping initialization.')
-
             # Connect to use existing database
             self.db_handler.connect()
 
