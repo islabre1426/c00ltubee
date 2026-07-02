@@ -1,4 +1,5 @@
 import { api, state } from '../main.js';
+import { handleCardViewRetract } from './downloadCard.js';
 
 export function handleSidebarButton() {
     const sidebarButton = document.getElementById('sidebar-button');
@@ -29,20 +30,8 @@ export async function toggleSidebar(sidebarState) {
 
     const id = sidebarMain.dataset.id;
 
-    if (id !== undefined) {
-        const card = document.querySelector(`.download-card[data-id="${id}"]`);
-
-        if (!card) {
-            throw new Error(`card id ${id} not found`);
-        }
-
-        const cardView = card.querySelector('.card-view');
-
-        if (!cardView) {
-            throw new Error(`card view of id ${id} not found`);
-        }
-
-        cardView.textContent = '>';
+    if (id) {
+        handleCardViewRetract(id);
     }
 }
 

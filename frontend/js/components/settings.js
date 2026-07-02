@@ -59,11 +59,21 @@ function createSettingCard(name, type, value) {
             break;
     }
 
-    document.querySelector('.content-main[data-page="Settings"] main').appendChild(container);
+    const contentMain = document.querySelector('.content-main[data-page="Settings"] main');
+
+    if (!contentMain) {
+        throw new Error('contentMain not found');
+    }
+
+    contentMain.appendChild(container);
 
     if (type === 'empty') return;
 
     const input = container.querySelector('input');
+
+    if (!input) {
+        throw new Error('input not found');
+    }
 
     switch (type) {
         case 'text':
@@ -80,7 +90,13 @@ function createSettingCard(name, type, value) {
             input.addEventListener('click', async () => {
                 await handleSettingChange(input, name);
 
-                container.querySelector(`label[for="${name}-value"]`).textContent = input.checked;
+                const label = container.querySelector(`label[for="${name}-value"]`);
+
+                if (!label) {
+                    throw new Error('label not found');
+                }
+
+                label.textContent = input.checked;
             });
 
             break;
@@ -99,6 +115,10 @@ function createSettingCard(name, type, value) {
 }
 
 async function handleSettingChange(element, name, value = null) {
+    if (!element) {
+        throw new Error('element not found');
+    }
+
     let chosenValue = value;
 
     if (!chosenValue) {

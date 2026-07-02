@@ -21,17 +21,41 @@ export function createDownloadCard(id, info) {
     </div>
     `;
 
-    document.querySelector('.content-main[data-page="Home"] main').prepend(container);
+    const contentMain = document.querySelector('.content-main[data-page="Home"] main');
+
+    if (!contentMain) {
+        throw new Error('contentMain not found');
+    }
+
+    contentMain.prepend(container);
 
     const cardViewButton = container.querySelector('.card-view');
+
+    if (!cardViewButton) {
+        throw new Error(`cardViewButton for id ${id} not found`);
+    }
 
     cardViewButton.addEventListener('click', async () => await handleCardViewButton(id, info));
 }
 
 async function handleCardViewButton(id, info) {
     const card = document.querySelector(`.download-card[data-id="${id}"]`);
+
+    if (!card) {
+        throw new Error(`card id ${id} not found`);
+    }
+
     const cardViewButton = card.querySelector('.card-view');
+
+    if (!cardViewButton) {
+        throw new Error(`cardViewButton for id ${id} not found`);
+    }
+
     const sidebarMain = document.getElementById('sidebar-main');
+
+    if (!sidebarMain) {
+        throw new Error(`sidebarMain not found`);
+    }
 
     const viewingCardId = sidebarMain.dataset.id;
 
@@ -47,10 +71,8 @@ async function handleCardViewButton(id, info) {
         await toggleSidebar(false);
         cardViewButton.textContent = '>';
         return;
-    } else if (viewingCardId !== undefined && viewingCardId !== id) {
-        const previousViewingCard = document.querySelector(`.download-card[data-id="${viewingCardId}"]`);
-        previousViewingCard.querySelector('.card-view').textContent = '>';
-        cardViewButton.textContent = '<';
+    } else if (viewingCardId && viewingCardId !== id) {
+        handleCardViewRetract(viewingCardId);
     }
 
     let passedInfo = info;
@@ -68,11 +90,17 @@ async function handleCardViewButton(id, info) {
 export function updateDownloadCard(id, info) {
     const card = document.querySelector(`.download-card[data-id="${id}"]`);
 
-    if (!card) return;
+    if (!card) {
+        throw new Error(`card id ${id} not found`);
+    };
 
     const titleElement = card.querySelector('.title');
     const statusElement = card.querySelector('.status');
     const percentElement = card.querySelector('.card-percent');
+
+    if (!titleElement || !statusElement || !percentElement) {
+        throw new Error('titleElement, statusElement or percentElement not found');
+    }
 
     let statusText = 'Status: ';
 
@@ -85,7 +113,6 @@ export function updateDownloadCard(id, info) {
         case 'downloading':
             statusText += 'Downloading...';
             percentElement.textContent = `${info['progress']}%`;
-
             break;
 
         case 'finished':
@@ -101,7 +128,6 @@ export function updateDownloadCard(id, info) {
 
         case 'error':
             statusText += 'Failed';
-            percentElement.textContent = '0%';
             break;
         
         case 'queued':
@@ -113,6 +139,7 @@ export function updateDownloadCard(id, info) {
             break;
 
         default:
+            throw new Error(`Invalid status: ${info['status']}`)
     }
 
     statusElement.textContent = statusText;
@@ -120,6 +147,10 @@ export function updateDownloadCard(id, info) {
 
 export async function renderCardInfo(id, info) {
     const sidebarMain = document.getElementById('sidebar-main');
+
+    if (!sidebarMain) {
+        throw new Error(`sidebarMain not found`);
+    }
 
     // Reset class list
     sidebarMain.className = '';
@@ -146,6 +177,10 @@ export async function renderCardInfo(id, info) {
     const deleteButton = document.getElementById('delete-button');
     const taskButton = document.getElementById('task-button');
 
+    if (!deleteButton || !taskButton) {
+        throw new Error(`deleteButton or taskButton for card id ${id} not found`);
+    }
+
     const log = await getLog(id);
 
     if (log) {
@@ -163,6 +198,11 @@ export async function renderCardInfo(id, info) {
 
 async function handleTaskButtonOperation() {
     const taskButton = document.getElementById('task-button');
+
+    if (!taskButton) {
+        throw new Error(`taskButton not found`);
+    }
+
     const id = taskButton.dataset.id;
 
     switch (taskButton.dataset.operation) {
@@ -189,13 +229,17 @@ async function handleTaskButtonOperation() {
 export function updateCardInfo(id, info) {
     const cardInfo = document.querySelector(`#sidebar-main[data-content-type="card-info"][data-id="${id}"]`);
 
-    if (!cardInfo) return;
+    if (!cardInfo) {
+        throw new Error(`cardInfo id ${id} not found`);
+    };
 
     const titleElement = cardInfo.querySelector('.title');
     const taskButton = document.getElementById('task-button');
-    const deleteButton = cardInfo.querySelector('#delete-button');
+    const deleteButton = document.getElementById('delete-button');
 
-    if (!titleElement || !taskButton || !deleteButton) return;
+    if (!titleElement || !taskButton || !deleteButton) {
+        throw new Error('titleElement, taskButton or deleteButton not found');
+    };
 
     let taskButtonOperation;
     let taskButtonText;
@@ -235,9 +279,31 @@ export function updateCardInfo(id, info) {
 export function updateLog(id, log) {
     const cardInfo = document.querySelector(`#sidebar-main[data-content-type="card-info"][data-id="${id}"]`);
 
-    if (!cardInfo) return;
+    if (!cardInfo) {
+        throw new Error(`cardInfo id ${id} not found`);
+    };
 
     const logElement = cardInfo.querySelector('.log');
 
+    if (!logElement) {
+        throw new Error(`logElement id ${id} not found`);
+    };
+
     logElement.textContent = log;
+}
+
+export function handleCardViewRetract(id) {
+    const card = document.querySelector(`.download-card[data-id="${id}"]`);
+
+    if (!card) {
+        throw new Error(`card id ${id} not found`);
+    }
+
+    const cardView = card.querySelector('.card-view');
+
+    if (!cardView) {
+        throw new Error(`card view of id ${id} not found`);
+    }
+
+    cardView.textContent = '>';
 }
