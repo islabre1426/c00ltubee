@@ -53,8 +53,8 @@ quickjs_spec = VendorSpec(
     None,
     Path(vendor_dir, 'quickjs'),
     [
-        ArchiveSpec('win32', 'quickjs-win-x86_64-2025-09-13.zip'),
-        ArchiveSpec('linux', 'quickjs-linux-x86_64-2025-09-13.zip'),
+        ArchiveSpec('win32', 'quickjs-win-x86_64-2026-06-04.zip'),
+        ArchiveSpec('linux', 'quickjs-linux-x86_64-2026-06-04.zip'),
     ],
     False,
 )
