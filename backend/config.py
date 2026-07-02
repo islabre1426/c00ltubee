@@ -8,6 +8,23 @@ def get_downloader_opts():
     vendor_dir = Path(get_root_dir(), 'vendor')
     qjs_exe = 'qjs.exe' if current_os == 'win32' else 'qjs'
 
+    default_video_format = setting_db.get_value_by_name('default_video_format')
+    default_audio_format = setting_db.get_value_by_name('default_audio_format')
+
+    best_audio_format_for_video_format = ''
+
+    match default_video_format:
+        case 'mp4':
+            best_audio_format_for_video_format = 'm4a'
+
+    best_video = f'bestvideo*[ext={default_video_format}]'
+    best_audio = f'bestaudio'
+
+    if best_audio_format_for_video_format != '':
+        best_audio += f'[ext={best_audio_format_for_video_format}]'
+
+    format = f'{best_video}+{best_audio}/best'
+
     downloader_opts = {
         'paths': {
             'home': setting_db.get_value_by_name('download_location'),
@@ -23,8 +40,8 @@ def get_downloader_opts():
                 'path': str(Path(vendor_dir, 'quickjs', current_os, qjs_exe)),
             }
         },
-        'format': 'bestvideo+bestaudio/best',
-        'merge_output_format': setting_db.get_value_by_name('default_video_format'),
+        'format': format,
+        'merge_output_format': default_video_format,
     }
 
     if setting_db.get_value_by_name('audio_only') == 'true':
@@ -32,7 +49,7 @@ def get_downloader_opts():
             'format': 'bestaudio/best',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
-                'preferredcodec': setting_db.get_value_by_name('default_audio_format'),
+                'preferredcodec': default_audio_format,
             }],
         })
 
