@@ -229,9 +229,8 @@ async function handleTaskButtonOperation() {
 export function updateCardInfo(id, info) {
     const cardInfo = document.querySelector(`#sidebar-main[data-content-type="card-info"][data-id="${id}"]`);
 
-    if (!cardInfo) {
-        throw new Error(`cardInfo id ${id} not found`);
-    };
+    // If not currently viewing, skip
+    if (!cardInfo) return;
 
     const titleElement = cardInfo.querySelector('.title');
     const taskButton = document.getElementById('task-button');
@@ -279,9 +278,8 @@ export function updateCardInfo(id, info) {
 export function updateLog(id, log) {
     const cardInfo = document.querySelector(`#sidebar-main[data-content-type="card-info"][data-id="${id}"]`);
 
-    if (!cardInfo) {
-        throw new Error(`cardInfo id ${id} not found`);
-    };
+    // If not currently viewing, skip
+    if (!cardInfo) return;
 
     const logElement = cardInfo.querySelector('.log');
 
