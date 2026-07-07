@@ -13,7 +13,7 @@ def _get_preferred_renderer():
         case 'win32':
             return 'edgechromium'
         case 'linux':
-            return 'qt'
+            return 'gtk'
         case _:
             raise RuntimeError(f'Unsupported platform: {current_os}')
 
@@ -26,8 +26,10 @@ def main(args: list[str]):
         debug_flag = True
 
     # Temporary workaround for black screen when detaching Web Inspector on Linux
-    # if current_os == 'linux' and debug_flag:
-    #     os.environ['WEBKIT_DISABLE_DMABUF_RENDERER'] = '1'
+    if current_os == 'linux' and debug_flag:
+        import os 
+        
+        os.environ['WEBKIT_DISABLE_DMABUF_RENDERER'] = '1'
 
     webview.create_window(
         title = 'c00ltubee',
