@@ -8,7 +8,9 @@ Before starting, make sure the following dependencies are installed:
 
 - Runtime dependencies:
     - Windows: Edge WebView2: pre-installed for Windows 10 and above, if not [download it from here](https://developer.microsoft.com/en-us/microsoft-edge/webview2?form=MA13LH) (Evergreen version recommended)
-    - Linux: Qt WebEngine: Consult your distro documentation!
+    - Linux:
+        - PyGObject: [see this documentation for installing](https://pygobject.gnome.org/getting_started.html)
+        - WebKitGTK: Consult your distro documentation!
 
 - Development dependencies:
     - uv
