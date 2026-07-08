@@ -80,8 +80,13 @@ function createSettingCard(name, type, value) {
             input.addEventListener('keydown', async (e) => {
                 if (e.key === 'Enter') {
                     await handleSettingChange(input, name);
+
+                    // Defocus input
+                    input.blur();
                 } else if (e.key === 'Escape') {
                     input.value = value;
+
+                    input.blur();
                 }
             });
             break;
