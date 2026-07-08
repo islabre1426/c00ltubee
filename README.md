@@ -48,6 +48,13 @@ After that, run:
 just build-win
 ```
 
+for Windows or
+```bash
+just build-linux
+```
+
+for Linux.
+
 ## Credit
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - [ffmpeg](https://ffmpeg.org/)
