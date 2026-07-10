@@ -37,11 +37,13 @@ def main(args: list[str]):
         min_size = (800, 600),
         width = 800,
         height = 600,
+        http_port = 2688,
     )
 
     webview.start(
         debug = debug_flag,
         gui = renderer,
+        private_mode = False,
     )
 
     # 
