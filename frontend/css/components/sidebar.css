@@ -48,6 +48,10 @@
     width: 100%;
 }
 
+#paste-url {
+    border-bottom: var(--border);
+}
+
 .card-info-container {
     font-size: var(--font-md);
 }

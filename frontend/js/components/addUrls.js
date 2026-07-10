@@ -20,9 +20,12 @@ function renderAddUrlsUI() {
         <textarea id="urls"></textarea>
     </main>
     <footer>
+        <button id="paste-url">Paste from clipboard</button>
         <button id="inject-button">Inject!!</button>
     </footer>
     `;
+
+    document.getElementById('paste-url').addEventListener('click', async () => await handlePasteUrl());
 
     document.getElementById('inject-button').addEventListener('click', async () => await handleDownload());
 }
@@ -110,4 +113,16 @@ export async function handleAddUrlsButton() {
 
         await toggleSidebar(true);
     });
+}
+
+async function handlePasteUrl() {
+    const urlsElement = document.getElementById('urls');
+
+    if (!urlsElement) return;
+
+    const url = await navigator.clipboard.readText();
+
+    if (url) {
+        urlsElement.value += url + "\n";
+    }
 }
