@@ -73,3 +73,12 @@ small {
     text-align: center;
     font-size: 1rem;
 }
+
+blockquote {
+    border-left: var(--border);
+    padding-left: 1rem;
+}
+
+figure blockquote {
+    margin: 0;
+}
