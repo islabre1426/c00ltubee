@@ -228,7 +228,15 @@ def move_content_to_parent(folder: Path):
 
 
 def main():
-    for spec in specs:
+    downloading_specs = specs
+
+    # Make sure only binaries for current OS is downloaded
+    for spec in downloading_specs:
+        for archive in spec.archives:
+            if archive.os != current_os:
+                spec.archives.remove(archive)
+
+    for spec in downloading_specs:
         print(f'Processing vendor {spec.name}...')
 
         process_vendor(spec)
