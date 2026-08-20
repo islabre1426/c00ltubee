@@ -1,9 +1,10 @@
 import webview
 
+import os
 import sys
 
 from backend.app import app
-from util.util import current_os
+from util.util import current_os, get_root_dir
 from database.download_history import download_history_db
 from database.setting import setting_db
 
@@ -25,11 +26,19 @@ def main(args: list[str]):
     if 'debug' in args:
         debug_flag = True
 
-    # Temporary workaround for black screen when detaching Web Inspector on Linux
-    if current_os == 'linux' and debug_flag:
-        import os 
-        
-        os.environ['WEBKIT_DISABLE_DMABUF_RENDERER'] = '1'
+    if current_os == 'linux':
+        # Temporary workaround for black screen when detaching Web Inspector on Linux
+        if debug_flag:
+            os.environ['WEBKIT_DISABLE_DMABUF_RENDERER'] = '1'
+
+        # Load shared libraries from downloaded ffmpeg (required for it to work correctly)
+        prev_ld_library_path = os.environ.get('LD_LIBRARY_PATH')
+        new_ld_library_path = f'{get_root_dir()}/vendor/ffmpeg/linux/lib'
+
+        if prev_ld_library_path:
+            new_ld_library_path += ':' + prev_ld_library_path
+
+        os.environ['LD_LIBRARY_PATH'] = new_ld_library_path
 
     webview.create_window(
         title = 'c00ltubee',
