@@ -20,7 +20,7 @@ Before starting, make sure the following dependencies are installed:
 ### How to run
 Clone this repository:
 ```bash
-git clone https://codeberg.org/islabre1426/c00ltubee
+git clone https://github.com/islabre1426/c00ltubee
 ```
 
 Change directory to the project:
