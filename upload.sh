@@ -7,7 +7,7 @@ if ! uname | grep -q -e MSYS -e Linux; then
     exit 1
 fi
 
-if ! command -v rsync; then
+if ! command -v rsync >/dev/null; then
     echo "rsync required. Please install rsync first."
     exit 1
 fi
