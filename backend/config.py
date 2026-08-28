@@ -1,12 +1,11 @@
 from pathlib import Path
 
 from database.setting import setting_db
-from util.util import get_root_dir, current_os
+from util.util import get_root_dir
 
 
 def get_downloader_opts():
     vendor_dir = Path(get_root_dir(), 'vendor')
-    qjs_exe = 'qjs.exe' if current_os == 'win32' else 'qjs'
 
     default_video_format = setting_db.get_value_by_name('default_video_format')
     default_audio_format = setting_db.get_value_by_name('default_audio_format')
@@ -34,10 +33,10 @@ def get_downloader_opts():
         },
         'noplaylist': True,
         'color': 'never',
-        'ffmpeg_location': str(Path(vendor_dir, 'ffmpeg', current_os, 'bin')),
+        'ffmpeg_location': str(Path(vendor_dir, 'ffmpeg', 'bin')),
         'js_runtimes': {
             'quickjs': {
-                'path': str(Path(vendor_dir, 'quickjs', current_os, qjs_exe)),
+                'path': str(Path(vendor_dir, 'quickjs', 'qjs.exe')),
             }
         },
         'format': format,
