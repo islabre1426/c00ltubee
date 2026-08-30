@@ -1,4 +1,4 @@
-import { api } from '../main.js'
+import { api } from '../api.js';
 
 export async function getLog(taskId) {
     const response = await api.getLog(taskId);

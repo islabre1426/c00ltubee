@@ -1,4 +1,5 @@
-import { api, state } from '../main.js';
+import { api } from '../api.js';
+import { state } from '../state.js';
 import { createDownloadCard } from './downloadCard.js';
 import { toggleSidebar } from './sidebar.js';
 import { startStatusPolling } from './statusPolling.js';

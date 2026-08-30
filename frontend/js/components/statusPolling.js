@@ -1,4 +1,5 @@
-import { api, state } from "../main.js";
+import { api } from '../api.js';
+import { state } from '../state.js';
 import { updateCardInfo, updateDownloadCard, updateLog } from "./downloadCard.js";
 import { getLog } from "./log.js";
 

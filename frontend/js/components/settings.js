@@ -1,4 +1,4 @@
-import { api } from '../main.js';
+import { api } from '../api.js';
 
 export async function createAllSettingCards() {
     const response = await api.getSettings();

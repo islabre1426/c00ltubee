@@ -1,4 +1,4 @@
-import { api } from "../main.js";
+import { api } from '../api.js';
 import { setupDialog } from "./dialog.js";
 import { createDownloadCard, updateDownloadCard } from "./downloadCard.js";
 import { cleanupSidebar, toggleSidebar } from "./sidebar.js";
