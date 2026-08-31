@@ -33,12 +33,12 @@ Install `yt-dlp` recommended dependencies:
 uv run vendor.py
 ```
 
+This will also download Python dependencies for the project.
+
 Finally, run this project:
 ```bash
 just
 ```
-
-This will first install required Python dependencies to a Virtual Environment and then run the app.
 
 ### How to build
 Make sure you're able to run this project. If not, [see here](#how-to-run).
