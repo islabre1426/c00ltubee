@@ -11,3 +11,6 @@ wheels/
 
 # Vendor folder
 vendor/
+
+# Database
+database/db/

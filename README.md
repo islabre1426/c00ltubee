@@ -1,15 +1,16 @@
 # c00ltubee
 A Youtube video downloader with c00lgui appearance.
 
-As of now, only Windows is supported.
-
 ## How to run this project from source
 
 ### Prerequisites
 Before starting, make sure the following dependencies are installed:
 
 - Runtime dependencies:
-    - Edge WebView2: pre-installed for Windows 10 and above, if not [download it from here](https://developer.microsoft.com/en-us/microsoft-edge/webview2?form=MA13LH) (Evergreen version recommended)
+    - Windows: Edge WebView2: pre-installed for Windows 10 and above, if not [download it from here](https://developer.microsoft.com/en-us/microsoft-edge/webview2?form=MA13LH) (Evergreen version recommended)
+    - Linux:
+        - PyGObject: [see this documentation for installing](https://pygobject.gnome.org/getting_started.html)
+        - WebKitGTK: Consult your distro documentation!
 
 - Development dependencies:
     - uv
@@ -44,8 +45,15 @@ Make sure you're able to run this project. If not, [see here](#how-to-run).
 
 After that, run:
 ```bash
-just build
+just build-win
 ```
+
+for Windows or
+```bash
+just build-linux
+```
+
+for Linux.
 
 ## Credit
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)

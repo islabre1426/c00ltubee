@@ -16,6 +16,9 @@ def get_app_data_location() -> Path:
         case 'win32':
             return Path(os.environ['LOCALAPPDATA'], 'c00ltubee')
 
+        case 'linux':
+            return Path(Path.home(), '.local', 'share', 'c00ltubee')
+
         case _:
             raise RuntimeError(f'Unsupported platform: {current_os}')
 
