@@ -1,6 +1,4 @@
-export const api = attachApi();
-
-function attachApi() {
+export function attachApi() {
     return {
         getHistory: async (id) => await fetchJson(`/history/get/${id}`),
         deleteHistory: async (id) => await fetchJson(`/history/delete/${id}`),

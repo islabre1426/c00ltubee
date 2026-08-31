@@ -1,5 +1,4 @@
-import { api } from '../api.js';
-import { state } from '../state.js';
+import { api, state } from '../main.js';
 import { handleCardViewRetract } from './downloadCard.js';
 
 export function handleSidebarButton() {

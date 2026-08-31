@@ -1,7 +1,6 @@
-import { api } from '../api.js';
-import { state } from '../state.js';
+import { api, state } from "../main.js";
 import { setupDialog } from "./dialog.js";
-import { getHistory } from "./history.js";
+import { getHistory, handleDeleteHistory } from "./history.js";
 import { getLog } from "./log.js";
 import { toggleSidebar } from "./sidebar.js";
 import { startStatusPolling } from "./statusPolling.js";
