@@ -45,8 +45,6 @@ hr.vr {
     height: 100%;
     font-size: var(--font-md);
     overflow-y: auto;
-    container-type: scroll-state;
-    container-name: content-main;
 }
 
 .download-card {
@@ -147,12 +145,28 @@ input[type="text"]:hover, input[type="checkbox"] + label:hover, input[type="butt
     background-color: var(--hover-color);
 }
 
-@container content-main scroll-state(scrollable: y) {
-    .download-card:last-child {
-        border-bottom: 0;
+/* Class for supporting scroll state in non-Chrome and/or older browser */
+.content-main[data-page="Home"] main.scroll-state-support .download-card:last-child {
+    border-bottom: 0;
+}
+
+.content-main[data-page="Home"] main.scroll-state-support .download-card .operations button {
+    border-right: var(--border);
+}
+
+@supports (container-type: scroll-state) {
+    .content-main main {
+        container-type: scroll-state;
+        container-name: content-main;
     }
 
-    .download-card .operations button {
-        border-right: var(--border);
+    @container content-main scroll-state(scrollable: y) {
+        .download-card:last-child {
+            border-bottom: 0;
+        }
+    
+        .download-card .operations button {
+            border-right: var(--border);
+        }
     }
 }

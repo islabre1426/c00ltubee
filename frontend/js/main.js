@@ -4,6 +4,7 @@ import { handleClearHistoryButton, populateHistory } from "./components/history.
 import { handleNavigation } from "./components/navigation.js";
 import { createAllSettingCards } from "./components/settings.js";
 import { handleSidebarButton } from "./components/sidebar.js";
+import { watchContainerOverflow } from "./support.js";
 
 await populateHistory();
 await createAllSettingCards();
@@ -13,3 +14,5 @@ handleSidebarButton();
 handleClearHistoryButton();
 handleDialog();
 handleAddUrlsButton();
+
+watchContainerOverflow();
