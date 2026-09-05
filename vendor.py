@@ -22,6 +22,7 @@ vendor_dir = Path(get_root_dir(), 'vendor')
 class ArchiveSpec:
     os: Literal['win32', 'linux']
     name: str
+    keep_archive: bool = False
 
 
 @dataclass
@@ -35,6 +36,18 @@ class VendorSpec:
 
 
 # --- Spec configuration ---
+yt_dlp_spec = VendorSpec(
+    'yt-dlp',
+    'https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/',
+    'SHA2-256SUMS',
+    Path(vendor_dir, 'yt-dlp'),
+    [
+        ArchiveSpec('win32', 'yt-dlp.exe', True),
+        ArchiveSpec('linux', 'yt-dlp', True),
+    ],
+    False,
+)
+
 ffmpeg_spec = VendorSpec(
     'ffmpeg',
     'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/',
@@ -44,7 +57,7 @@ ffmpeg_spec = VendorSpec(
         ArchiveSpec('win32', 'ffmpeg-n8.1-latest-win64-gpl-shared-8.1.zip'),
         ArchiveSpec('linux', 'ffmpeg-n8.1-latest-linux64-gpl-shared-8.1.tar.xz'),
     ],
-    True
+    True,
 )
 
 quickjs_spec = VendorSpec(
@@ -60,6 +73,7 @@ quickjs_spec = VendorSpec(
 )
 
 specs = [
+    yt_dlp_spec,
     ffmpeg_spec,
     quickjs_spec,
 ]
@@ -154,7 +168,7 @@ def extract_file(archive_file: Path, dest_dir: Path):
             archive.extractall(dest_dir)
 
     else:
-        raise RuntimeError(f'Unsupported archive format for {archive_file}')
+        print(f'Unrecognized archive format for {archive_file}. Keeping it as-is.')
     
     print(f'{archive_file_name} extracted.')
 
@@ -182,7 +196,10 @@ def process_vendor(spec: VendorSpec):
 
         download_file(spec.base_url, archive.name, dest_folder_path)
 
-        cleanup_paths.append(archive_file_path)
+        if not archive.keep_archive:
+            print(f'Keeping {archive.name}.')
+            
+            cleanup_paths.append(archive_file_path)
 
     if spec.checksum_file:
         checksum_file_path = Path(spec.base_dir, spec.checksum_file)
