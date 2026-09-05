@@ -43,7 +43,7 @@ yt_dlp_spec = VendorSpec(
     Path(vendor_dir, 'yt-dlp'),
     [
         ArchiveSpec('win32', 'yt-dlp.exe', True),
-        ArchiveSpec('linux', 'yt-dlp', True),
+        ArchiveSpec('linux', 'yt-dlp_linux', True),
     ],
     False,
 )
@@ -196,10 +196,10 @@ def process_vendor(spec: VendorSpec):
 
         download_file(spec.base_url, archive.name, dest_folder_path)
 
-        if not archive.keep_archive:
-            print(f'Keeping {archive.name}.')
-            
+        if not archive.keep_archive:    
             cleanup_paths.append(archive_file_path)
+        else:
+            print(f'Keeping {archive.name}.')
 
     if spec.checksum_file:
         checksum_file_path = Path(spec.base_dir, spec.checksum_file)
@@ -216,7 +216,16 @@ def process_vendor(spec: VendorSpec):
         dest_folder_path = Path(spec.base_dir, archive.os)
         archive_file_path = Path(dest_folder_path, archive.name)
 
-        extract_file(archive_file_path, dest_folder_path)
+        if archive.keep_archive:
+            if archive.os == 'linux':
+                print(f'{archive_file_path} is assumed to be binary. Adding executable bits on Linux...')
+
+                # Preserve existing permissions
+                current_file_perms = archive_file_path.stat().st_mode
+
+                archive_file_path.chmod(current_file_perms | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        else:
+            extract_file(archive_file_path, dest_folder_path)
 
     cleanup(cleanup_paths)
 
