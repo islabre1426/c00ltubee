@@ -12,5 +12,4 @@ dependencies = [
     "pywebview[gtk]>=6.2.1 ; sys_platform == 'linux'",
     "requests>=2.34.2",
     "tqdm>=4.67.3",
-    "yt-dlp[default]>=2026.3.17",
 ]
