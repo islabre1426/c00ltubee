@@ -91,9 +91,7 @@ def get_title(line: str) -> str:
 
 
 def get_size(line: str) -> dict:
-    matched = re.findall('^\[c00ltubee\] Total Size: (\d+)\tDownloaded: (\d+)$', line)
-
-    print(matched)
+    matched = re.findall(r'^\[c00ltubee\] Total Size: (\d+)' + '\t' + r'Downloaded: (\d+)$', line)
 
     if matched:
         return {
@@ -110,8 +108,6 @@ def download_video_v2(opts: list, id: str, url: str, logger: Logger):
         'status': 'starting',
     })
 
-    download_history_db.update_log_file_path_by_id(id, str(logger.log_path))
-
     cmd = [ yt_dlp_path, *opts, url ]
 
     with subprocess.Popen(args = cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, text = True) as p:
@@ -122,6 +118,9 @@ def download_video_v2(opts: list, id: str, url: str, logger: Logger):
             line = line.strip()
             
             logger.write(line)
+
+            # Log file only exist after writing line using logger
+            download_history_db.update_log_file_path_by_id(id, str(logger.log_path))
 
             if download_tasks[id]['status'] == 'starting' and download_tasks[id]['title'] == waiting_title:
                 title = get_title(line)
