@@ -22,6 +22,9 @@ def get_downloader_opts_v2():
         '--color', 'never',
 
         '--ffmpeg-location', str(Path(vendor_dir, 'ffmpeg', current_os, 'bin')),
+
+        # Explicitly use QuickJS
+        '--no-js-runtimes',
         '--js-runtimes', 'quickjs:' + str(Path(vendor_dir, 'quickjs', current_os, qjs_exe)),
 
         # For parsing info
