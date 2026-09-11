@@ -110,6 +110,8 @@ def download_video_v2(opts: list, id: str, url: str, logger: Logger):
         'status': 'starting',
     })
 
+    download_history_db.update_log_file_path_by_id(id, str(logger.log_path))
+
     cmd = [ yt_dlp_path, *opts, url ]
 
     with subprocess.Popen(args = cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, text = True) as p:
@@ -118,14 +120,11 @@ def download_video_v2(opts: list, id: str, url: str, logger: Logger):
                 p.kill()
 
             line = line.strip()
-
-            print(line)
+            
             logger.write(line)
 
             if download_tasks[id]['status'] == 'starting' and download_tasks[id]['title'] == waiting_title:
                 title = get_title(line)
-
-                print('Retrieved title: ' + title)
 
                 if title:
                     download_history_db.update_by_id(
@@ -142,9 +141,6 @@ def download_video_v2(opts: list, id: str, url: str, logger: Logger):
                     })
 
             size = get_size(line)
-
-            print('Retrieved size: ')
-            print(size)
 
             if size:
                 total = int(size.get('total', 0))

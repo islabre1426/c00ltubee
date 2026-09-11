@@ -112,6 +112,18 @@ class DownloadHistory:
                 f'UPDATE {self.name} SET status_type = ? WHERE task_id = ?',
                 (status_type, task_id),
             )
+
+
+    def update_log_file_path_by_id(
+        self,
+        task_id: str,
+        log_file_path: str,
+    ):
+        with self.connection as conn:
+            conn.execute(
+                f'UPDATE {self.name} SET log_file_path = ? WHERE task_id = ?',
+                (log_file_path, task_id),
+            )
     
 
     def delete_by_id(self, task_id: str):
