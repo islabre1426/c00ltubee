@@ -110,7 +110,14 @@ def download_video_v2(opts: list, id: str, url: str, logger: Logger):
 
     cmd = [ yt_dlp_path, *opts, url ]
 
-    with subprocess.Popen(args = cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, text = True) as p:
+    process_creation_flag = subprocess.CREATE_NO_WINDOW if current_os == 'win32' else 0
+
+    with subprocess.Popen(
+        args = cmd,
+        stdout = subprocess.PIPE, stderr = subprocess.STDOUT,
+        text = True,
+        creationflags = process_creation_flag,
+    ) as p:
         for line in p.stdout:
             if id in cancelling_tasks:
                 p.kill()
