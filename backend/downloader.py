@@ -19,6 +19,11 @@ yt_dlp_path = str(Path(get_root_dir(), 'vendor', 'yt-dlp', current_os, yt_dlp_ex
 
 waiting_title = 'Waiting...'
 
+process_creation_flag = subprocess.CREATE_NO_WINDOW if current_os == 'win32' else 0
+yt_dlp_first_update_after_launch = True
+
+separator = '-' * 75
+
 
 class Logger:
     def __init__(self, id: str):
@@ -36,7 +41,6 @@ class Logger:
         # Without encoding format, non-English message will look weird
         with self.log_path.open(mode = 'a', encoding = 'utf-8') as f:
             f.write(msg + '\n')
-
 
 
 def on_task_error(id: str):
@@ -79,7 +83,6 @@ def on_task_cancelled(id: str):
     cancelling_tasks.discard(id)
 
 
-
 def get_title(line: str) -> str:
     matched = re.findall(r'^\[c00ltubee\] Title: (.*)$', line)
 
@@ -87,7 +90,6 @@ def get_title(line: str) -> str:
         return matched[0]
 
     return ''
-
 
 
 def get_size(line: str) -> dict:
@@ -102,15 +104,14 @@ def get_size(line: str) -> dict:
     return {}
 
 
-
 def download_video_v2(opts: list, id: str, url: str, logger: Logger):
     download_tasks[id].update({
         'status': 'starting',
     })
 
-    cmd = [ yt_dlp_path, *opts, url ]
+    logger.write(separator)
 
-    process_creation_flag = subprocess.CREATE_NO_WINDOW if current_os == 'win32' else 0
+    cmd = [ yt_dlp_path, *opts, url ]
 
     with subprocess.Popen(
         args = cmd,
@@ -123,7 +124,6 @@ def download_video_v2(opts: list, id: str, url: str, logger: Logger):
                 p.kill()
 
             line = line.strip()
-            
             logger.write(line)
 
             # Log file only exist after writing line using logger
@@ -158,6 +158,7 @@ def download_video_v2(opts: list, id: str, url: str, logger: Logger):
                     'progress': round(percentage, 2),
                 })
 
+
     if id in cancelling_tasks:
         on_task_cancelled(id)
 
@@ -170,7 +171,33 @@ def download_video_v2(opts: list, id: str, url: str, logger: Logger):
         on_task_success(id)
 
 
+def update_yt_dlp():
+    logger = Logger('yt-dlp')
+
+    logger.write(separator)
+
+    cmd = [ yt_dlp_path, '--update' ]
+
+    with subprocess.Popen(
+        args = cmd,
+        stdout = subprocess.PIPE, stderr = subprocess.STDOUT,
+        text = True,
+        creationflags = process_creation_flag,
+    ) as p:
+        for line in p.stdout:
+            line = line.strip()
+            logger.write(line)
+
+
+
 def start_worker_v2():
+    global yt_dlp_first_update_after_launch
+
+    if yt_dlp_first_update_after_launch:
+        update_yt_dlp()
+        yt_dlp_first_update_after_launch = False
+
+
     while True:
         if download_queue.empty():
             break
