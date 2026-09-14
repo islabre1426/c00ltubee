@@ -1,12 +1,11 @@
 from pathlib import Path
 
 from database.setting import setting_db
-from util.util import get_root_dir, current_os
+from util.util import get_root_dir
 
 
 def get_downloader_opts_v2():
     vendor_dir = Path(get_root_dir(), 'vendor')
-    qjs_exe = 'qjs.exe' if current_os == 'win32' else 'qjs'
     yt_dlp_preset = [ 'mp3', 'aac', 'mp4', 'mkv' ]
 
     default_video_format = setting_db.get_value_by_name('default_video_format')
@@ -21,11 +20,11 @@ def get_downloader_opts_v2():
         '--no-playlist',
         '--color', 'never',
 
-        '--ffmpeg-location', str(Path(vendor_dir, 'ffmpeg', current_os, 'bin')),
+        '--ffmpeg-location', str(Path(vendor_dir, 'ffmpeg', 'bin')),
 
         # Explicitly use QuickJS
         '--no-js-runtimes',
-        '--js-runtimes', 'quickjs:' + str(Path(vendor_dir, 'quickjs', current_os, qjs_exe)),
+        '--js-runtimes', 'quickjs:' + str(Path(vendor_dir, 'quickjs', 'qjs.exe')),
 
         # For parsing info
         '--print', r'[c00ltubee] Title: %(title)s',

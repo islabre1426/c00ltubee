@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('frontend', 'frontend'), ('database/sql', 'database/sql'), ('vendor/ffmpeg/win32', 'vendor/ffmpeg/win32'), ('vendor/quickjs/win32', 'vendor/quickjs/win32'), ('vendor/yt-dlp/win32', 'vendor/yt-dlp/win32')],
+    datas=[('frontend', 'frontend'), ('database/sql', 'database/sql'), ('vendor/ffmpeg', 'vendor/ffmpeg'), ('vendor/quickjs', 'vendor/quickjs'), ('vendor/yt-dlp', 'vendor/yt-dlp')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -32,7 +32,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['c00ltubee.png'],
+    icon=['c00ltubee.ico'],
 )
 coll = COLLECT(
     exe,

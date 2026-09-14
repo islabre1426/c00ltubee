@@ -3,7 +3,7 @@
 ; Non-commercial use only.
 
 #define MyAppName "c00ltubee"
-#define MyAppVersion "v2026.09.12"
+#define MyAppVersion "v2026.09.14"
 #define MyAppPublisher "Islabre"
 #define MyAppURL "https://c00ltubee.islabre.fyi/"
 #define MyAppExeName "c00ltubee.exe"
@@ -48,8 +48,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\Islabre\Desktop\Projects\c00ltubee\dist\c00ltubee\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Islabre\Desktop\Projects\c00ltubee\dist\c00ltubee\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "dist\c00ltubee\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\c00ltubee\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files.
 
 [Icons]

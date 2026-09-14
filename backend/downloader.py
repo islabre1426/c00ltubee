@@ -7,19 +7,18 @@ import threading
 
 from backend.config import get_downloader_opts
 from database.download_history import download_history_db
-from util.util import get_app_data_location, get_root_dir, current_os
+from util.util import get_app_data_location, get_root_dir
 
 
 download_queue = Queue()
 download_tasks = {}
 cancelling_tasks = set()
 
-yt_dlp_exe = 'yt-dlp.exe' if current_os == 'win32' else 'yt-dlp_linux'
-yt_dlp_path = str(Path(get_root_dir(), 'vendor', 'yt-dlp', current_os, yt_dlp_exe))
+yt_dlp_path = str(Path(get_root_dir(), 'vendor', 'yt-dlp', 'yt-dlp.exe'))
 
 waiting_title = 'Waiting...'
 
-process_creation_flag = subprocess.CREATE_NO_WINDOW if current_os == 'win32' else 0
+process_creation_flag = subprocess.CREATE_NO_WINDOW
 yt_dlp_first_update_after_launch = True
 
 separator = '-' * 75

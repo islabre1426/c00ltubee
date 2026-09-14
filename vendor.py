@@ -1,6 +1,3 @@
-import stat
-import tarfile
-from typing import Literal
 from dataclasses import dataclass
 from hashlib import sha256
 import shutil
@@ -11,7 +8,7 @@ from tqdm import tqdm
 
 from pathlib import Path
 
-from util.util import current_os, get_root_dir
+from util.util import get_root_dir
 
 
 vendor_dir = Path(get_root_dir(), 'vendor')
@@ -19,57 +16,43 @@ vendor_dir = Path(get_root_dir(), 'vendor')
 
 # --- Spec definition ---
 @dataclass
-class ArchiveSpec:
-    os: Literal['win32', 'linux']
-    name: str
-    keep_archive: bool = False
-
-
-@dataclass
 class VendorSpec:
     name: str
     base_url: str
     checksum_file: str | None
     base_dir: Path
-    archives: list[ArchiveSpec]
+    archive_name: str
     has_top_level_dir: bool
+    keep_archive: bool = False
 
 
 # --- Spec configuration ---
 yt_dlp_spec = VendorSpec(
-    'yt-dlp',
-    'https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/',
-    'SHA2-256SUMS',
-    Path(vendor_dir, 'yt-dlp'),
-    [
-        ArchiveSpec('win32', 'yt-dlp.exe', True),
-        ArchiveSpec('linux', 'yt-dlp_linux', True),
-    ],
-    False,
+    name = 'yt-dlp',
+    base_url = 'https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/',
+    checksum_file = 'SHA2-256SUMS',
+    base_dir = Path(vendor_dir, 'yt-dlp'),
+    archive_name = 'yt-dlp.exe',
+    has_top_level_dir = False,
+    keep_archive = True,
 )
 
 ffmpeg_spec = VendorSpec(
-    'ffmpeg',
-    'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/',
-    'checksums.sha256',
-    Path(vendor_dir, 'ffmpeg'),
-    [
-        ArchiveSpec('win32', 'ffmpeg-n8.1-latest-win64-gpl-shared-8.1.zip'),
-        ArchiveSpec('linux', 'ffmpeg-n8.1-latest-linux64-gpl-shared-8.1.tar.xz'),
-    ],
-    True,
+    name = 'ffmpeg',
+    base_url = 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/',
+    checksum_file = 'checksums.sha256',
+    base_dir = Path(vendor_dir, 'ffmpeg'),
+    archive_name = 'ffmpeg-n8.1-latest-win64-gpl-shared-8.1.zip',
+    has_top_level_dir = True,
 )
 
 quickjs_spec = VendorSpec(
-    'quickjs',
-    'https://bellard.org/quickjs/binary_releases/',
-    None,
-    Path(vendor_dir, 'quickjs'),
-    [
-        ArchiveSpec('win32', 'quickjs-win-x86_64-2026-06-04.zip'),
-        ArchiveSpec('linux', 'quickjs-linux-x86_64-2026-06-04.zip'),
-    ],
-    False,
+    name = 'quickjs',
+    base_url = 'https://bellard.org/quickjs/binary_releases/',
+    checksum_file = None,
+    base_dir = Path(vendor_dir, 'quickjs'),
+    archive_name = 'quickjs-win-x86_64-2026-06-04.zip',
+    has_top_level_dir = False,
 )
 
 specs = [
@@ -140,35 +123,11 @@ def extract_file(archive_file: Path, dest_dir: Path):
 
     if archive_file_name.endswith('.zip'):
         with zipfile.ZipFile(archive_file) as archive:
-            for info in archive.infolist():
-                archive.extract(info, dest_dir)
-
-                extracted_path = Path(dest_dir, info.filename)
-
-                if not extracted_path.exists():
-                    continue
-
-                if current_os == 'linux':
-                    # Extract high 16 bits (Unix file mode)
-                    mode = info.external_attr >> 16
-
-                    if mode:
-                        # For directories, ensure execute permission for traversal
-                        if stat.S_ISDIR(extracted_path.stat().st_mode):
-                            mode |= 0o111 # Add execute for user/group/others
-
-                        print(f'Copying permission {mode} for {extracted_path}...')
-
-                        extracted_path.chmod(mode & 0o777) # Mask to 777 to avoid extra bits
-
-                        print(f'{extracted_path} permission preserved.')
-
-    elif archive_file_name.endswith('.tar.xz'):
-        with tarfile.open(archive_file, 'r:xz') as archive:
             archive.extractall(dest_dir)
 
     else:
         print(f'Unrecognized archive format for {archive_file}. Keeping it as-is.')
+
     
     print(f'{archive_file_name} extracted.')
 
@@ -188,44 +147,30 @@ def cleanup(paths: list[Path]):
 def process_vendor(spec: VendorSpec):
     cleanup_paths: list[Path] = []
 
-    for archive in spec.archives:
-        dest_folder_path = Path(spec.base_dir, archive.os)
-        archive_file_path = Path(dest_folder_path, archive.name)
+    dest_folder_path = Path(spec.base_dir)
+    archive_file_path = Path(dest_folder_path, spec.archive_name)
 
-        dest_folder_path.mkdir(parents = True)
+    dest_folder_path.mkdir(parents = True)
 
-        download_file(spec.base_url, archive.name, dest_folder_path)
+    download_file(spec.base_url, spec.archive_name, dest_folder_path)
 
-        if not archive.keep_archive:    
-            cleanup_paths.append(archive_file_path)
-        else:
-            print(f'Keeping {archive.name}.')
+    if not spec.keep_archive:    
+        cleanup_paths.append(archive_file_path)
+    else:
+        print(f'Keeping {spec.archive_name}.')
+
 
     if spec.checksum_file:
         checksum_file_path = Path(spec.base_dir, spec.checksum_file)
 
         download_file(spec.base_url, spec.checksum_file, spec.base_dir)
 
-        for archive in spec.archives:
-            artifact_file_path = Path(spec.base_dir, archive.os, archive.name)
-            verify_file(checksum_file_path, artifact_file_path)
+        verify_file(checksum_file_path, archive_file_path)
 
         cleanup_paths.append(checksum_file_path)
-    
-    for archive in spec.archives:
-        dest_folder_path = Path(spec.base_dir, archive.os)
-        archive_file_path = Path(dest_folder_path, archive.name)
 
-        if archive.keep_archive:
-            if archive.os == 'linux':
-                print(f'{archive_file_path} is assumed to be binary. Adding executable bits on Linux...')
 
-                # Preserve existing permissions
-                current_file_perms = archive_file_path.stat().st_mode
-
-                archive_file_path.chmod(current_file_perms | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-        else:
-            extract_file(archive_file_path, dest_folder_path)
+    extract_file(archive_file_path, dest_folder_path)
 
     cleanup(cleanup_paths)
 
@@ -254,15 +199,7 @@ def move_content_to_parent(folder: Path):
 
 
 def main():
-    downloading_specs = specs
-
-    # Make sure only binaries for current OS is downloaded
-    for spec in downloading_specs:
-        for archive in spec.archives:
-            if archive.os != current_os:
-                spec.archives.remove(archive)
-
-    for spec in downloading_specs:
+    for spec in specs:
         print(f'Processing vendor {spec.name}...')
 
         process_vendor(spec)
@@ -270,17 +207,11 @@ def main():
         print(f'Vendor {spec.name} processed.\n')
 
         if spec.has_top_level_dir:
-            for archive in spec.archives:
-                # Make sure .tar.xz is removed from the dir name
-                if archive.name.endswith('.tar.xz'):
-                    top_level_dir_name = Path(Path(archive.name).stem).stem
-                else:
-                    top_level_dir_name = Path(archive.name).stem
+            top_level_dir_name = Path(spec.archive_name).stem
+            top_level_dir_path = Path(spec.base_dir, top_level_dir_name)
 
-                top_level_dir_path = Path(spec.base_dir, archive.os, top_level_dir_name)
-
-                print(f'Post-processing...')
-                move_content_to_parent(top_level_dir_path)
+            print(f'Post-processing...')
+            move_content_to_parent(top_level_dir_path)
     
     print('All specs processed. Have a good day.')
 
