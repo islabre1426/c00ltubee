@@ -5,6 +5,9 @@ build_path := join(just_dir, 'build')
 dist_path := join(just_dir, 'dist')
 website_path := join(just_dir, 'website')
 
+remote_name := 'personal-server'
+remote_website_path := '/var/www/html/c00ltubee/'
+
 default: dev
 
 dev:
@@ -18,3 +21,12 @@ build-clean:
 
 website-fetch:
 	git worktree add "{{website_path}}" website
+
+[script]
+website-deploy:
+	cd "{{website_path}}"
+	git add .
+	git commit -m "Deployed website"
+	git push origin website
+	ssh "{{remote_name}}" "cd {{remote_website_path}} && git pull"
+	cd ..
