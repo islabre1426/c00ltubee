@@ -1,8 +1,7 @@
-from bottle import Bottle, static_file, request, abort, HTTPResponse
+from flask import Flask, jsonify, send_from_directory, abort, request
 
 from pathlib import Path
 from uuid import uuid4
-import json
 
 from backend import downloader, windowhandler, log
 from database.download_history import download_history_db
@@ -10,8 +9,13 @@ from database.setting import setting_db
 from util.util import get_root_dir, is_valid_uuid
 
 
-app = Bottle()
 static_folder = Path(get_root_dir(), 'frontend')
+
+app = Flask(
+    import_name = __name__,
+    static_folder = static_folder,
+    static_url_path = '/',
+)
 
 
 # 
@@ -19,7 +23,7 @@ static_folder = Path(get_root_dir(), 'frontend')
 # 
 @app.get('/')
 def index():
-    return static_file('index.html', root = static_folder)
+    return send_from_directory(static_folder, 'index.html')
 
 
 # 
@@ -35,10 +39,10 @@ def get_history(id):
             history = download_history_db.get_by_id_as_dict(id)
         
         else:
-            abort(406, 'Invalid id sent')
+            abort(406)
     
     except:
-        abort(404, 'History not found')
+        abort(404)
     
     else:
         response = {
@@ -46,7 +50,7 @@ def get_history(id):
             'history': history,
         }
 
-        return HTTPResponse(status = 200, body = json.dumps(response))
+        return jsonify(response)
 
 
 @app.get('/history/delete/<id>')
@@ -58,13 +62,13 @@ def delete_history(id):
         download_history_db.delete_by_id(id)
 
     else:
-        abort(406, 'Invalid id sent')
+        abort(406)
     
     response = {
         'status': 'success'
     }
 
-    return HTTPResponse(status = 200, body = json.dumps(response))
+    return jsonify(response)
 
 
 # 
@@ -76,7 +80,7 @@ def start_download():
     req_id = request.json['id']
 
     if url is None:
-        abort(404, 'url not found')
+        abort(404)
     
     # Assign task before the UI starts polling
     if req_id is None:
@@ -86,7 +90,7 @@ def start_download():
         id = req_id
 
     else:
-        abort(406, 'Invalid id sent')
+        abort(406)
     
     downloader.add_task_to_queue(id, url)
 
@@ -95,7 +99,7 @@ def start_download():
         'id': id,
     }
 
-    return HTTPResponse(status = 200, body = json.dumps(response))
+    return jsonify(response)
 
 
 @app.get('/downloader/start/worker')
@@ -106,31 +110,31 @@ def start_worker():
         'status': 'success',
     }
 
-    return HTTPResponse(status = 200, body = json.dumps(response))
+    return jsonify(response)
 
 
 @app.get('/downloader/get/status/<id>')
 def get_download_status(id):
     if not is_valid_uuid(id):
-        abort(406, 'Invalid id sent')
+        abort(406)
     
     info = downloader.get_task_info(id)
 
     if info is None:
-        abort(404, 'Status not found')
+        abort(404)
 
     response = {
         'status': 'success',
         'info': info,
     }
 
-    return HTTPResponse(status = 200, body = json.dumps(response))
+    return jsonify(response)
 
 
 @app.get('/downloader/get/log/<id>')
 def get_log(id):
     if not is_valid_uuid(id):
-        abort(406, 'Invalid id sent')
+        abort(406)
     
     log_content = log.get_log(id)
 
@@ -139,20 +143,20 @@ def get_log(id):
             'status': 'no log content found',
         }
 
-        return HTTPResponse(status = 200, body = json.dumps(response))
+        return jsonify(response)
 
     response = {
         'status': 'success',
         'content': log_content,
     }
 
-    return HTTPResponse(status = 200, body = json.dumps(response))
+    return jsonify(response)
 
 
 @app.get('/downloader/cancel/<id>')
 def cancel_download(id):
     if not is_valid_uuid(id):
-        abort(406, 'Invalid id sent')
+        abort(406)
 
     downloader.cancel_task(id)
 
@@ -160,7 +164,7 @@ def cancel_download(id):
         'status': 'success',
     }
 
-    return HTTPResponse(status = 200, body = json.dumps(response))
+    return jsonify(response)
 
 
 @app.get('/setting/get/all')
@@ -172,7 +176,7 @@ def get_settings():
         'settings': settings,
     }
 
-    return HTTPResponse(status = 200, body = json.dumps(response))
+    return jsonify(response)
 
 
 @app.post('/setting/save')
@@ -190,7 +194,7 @@ def save_setting():
         'status': 'success',
     }
 
-    return HTTPResponse(status = 200, body = json.dumps(response))
+    return jsonify(response)
 
 
 # 
@@ -203,7 +207,7 @@ def extend_sidebar():
     extend_flag = request.json['extend']
 
     if extend_flag is None:
-        abort(404, 'extend not found')
+        abort(404)
     
     windowhandler.handle_sidebar(extend_flag)
 
@@ -211,7 +215,7 @@ def extend_sidebar():
         'status': 'success',
     }
 
-    return HTTPResponse(status = 200, body = json.dumps(response))
+    return jsonify(response)
 
 
 @app.get('/folder-picker')
@@ -219,21 +223,11 @@ def folder_picker():
     selected_folder = windowhandler.folder_picker()
 
     if selected_folder is None:
-        abort(404, 'Folder not chosen')
+        abort(404)
     
     response = {
         'status': 'success',
         'selectedFolder': selected_folder,
     }
 
-    return HTTPResponse(status = 200, body = json.dumps(response))
-
-
-# 
-# Static files
-# 
-
-# Avoid conflicting with other endpoints by putting it here
-@app.get('/<filepath:path>')
-def static_files(filepath):
-    return static_file(filepath, root = static_folder)
+    return jsonify(response)
