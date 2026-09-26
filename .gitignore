@@ -14,3 +14,6 @@ vendor/
 
 # Database
 database/db/
+
+# Website is in seperate branch, no need to commit it to main
+website/
