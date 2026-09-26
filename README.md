@@ -17,8 +17,6 @@ Before starting, make sure the following dependencies are installed:
     - git
 
 - Optional:
-    - MSYS2 (providing environment for rsync and openssh)
-    - rsync (for uploading website to remote server)
     - openssh (for authenticating to the remote server, configure first!)
 
 ### How to run
