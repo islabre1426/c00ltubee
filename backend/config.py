@@ -4,7 +4,7 @@ from database.setting import setting_db
 from util.util import get_root_dir
 
 
-def get_downloader_opts_v2():
+def get_downloader_opts():
     vendor_dir = Path(get_root_dir(), 'vendor')
     yt_dlp_preset = [ 'mp3', 'aac', 'mp4', 'mkv' ]
 
@@ -58,8 +58,3 @@ def get_downloader_opts_v2():
             ])
 
     return opts
-
-
-
-def get_downloader_opts():
-    return get_downloader_opts_v2()

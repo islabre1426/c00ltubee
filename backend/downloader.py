@@ -21,7 +21,7 @@ waiting_title = 'Waiting...'
 process_creation_flag = subprocess.CREATE_NO_WINDOW
 yt_dlp_first_update_after_launch = True
 
-separator = '-' * 75
+separator = '-' * 70
 
 
 class Logger:
@@ -118,44 +118,45 @@ def download_video_v2(opts: list, id: str, url: str, logger: Logger):
         text = True,
         creationflags = process_creation_flag,
     ) as p:
-        for line in p.stdout:
-            if id in cancelling_tasks:
-                p.kill()
+        if p.stdout:
+            for line in p.stdout:
+                if id in cancelling_tasks:
+                    p.kill()
 
-            line = line.strip()
-            logger.write(line)
+                line = line.strip()
+                logger.write(line)
 
-            # Log file only exist after writing line using logger
-            download_history_db.update_log_file_path_by_id(id, str(logger.log_path))
+                # Log file only exist after writing line using logger
+                download_history_db.update_log_file_path_by_id(id, str(logger.log_path))
 
-            if download_tasks[id]['status'] == 'starting' and download_tasks[id]['title'] == waiting_title:
-                title = get_title(line)
+                if download_tasks[id]['status'] == 'starting' and download_tasks[id]['title'] == waiting_title:
+                    title = get_title(line)
 
-                if title:
-                    download_history_db.update_by_id(
-                        id,
-                        title,
-                        url,
-                        'working',
-                        str(logger.log_path),
-                    )
+                    if title:
+                        download_history_db.update_by_id(
+                            id,
+                            title,
+                            url,
+                            'working',
+                            str(logger.log_path),
+                        )
+
+                        download_tasks[id].update({
+                            'title': title,
+                            'progress': 0,
+                        })
+
+                size = get_size(line)
+
+                if size:
+                    total = int(size.get('total', 0))
+                    downloaded = int(size.get('downloaded', 0))
+                    percentage = (downloaded / total * 100) if total > 0 else 0
 
                     download_tasks[id].update({
-                        'title': title,
-                        'progress': 0,
+                        'status': 'downloading',
+                        'progress': round(percentage, 2),
                     })
-
-            size = get_size(line)
-
-            if size:
-                total = int(size.get('total', 0))
-                downloaded = int(size.get('downloaded', 0))
-                percentage = (downloaded / total * 100) if total > 0 else 0
-
-                download_tasks[id].update({
-                    'status': 'downloading',
-                    'progress': round(percentage, 2),
-                })
 
 
     if id in cancelling_tasks:
@@ -183,13 +184,14 @@ def update_yt_dlp():
         text = True,
         creationflags = process_creation_flag,
     ) as p:
-        for line in p.stdout:
-            line = line.strip()
-            logger.write(line)
+        if p.stdout:
+            for line in p.stdout:
+                line = line.strip()
+                logger.write(line)
 
 
 
-def start_worker_v2():
+def start_worker():
     global yt_dlp_first_update_after_launch
 
     if yt_dlp_first_update_after_launch:
@@ -217,10 +219,6 @@ def start_worker_v2():
         )
 
         task_process.start()
-
-
-def start_worker():
-    start_worker_v2()
 
 
 def add_task_to_queue(id: str, url: str):

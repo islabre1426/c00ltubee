@@ -25,6 +25,9 @@ def handle_sidebar(extend: bool):
 def folder_picker():
     current_window = webview.active_window()
 
+    if not current_window:
+        return
+
     selected_folder = current_window.create_file_dialog(webview.FileDialog.FOLDER)
 
     if selected_folder is None:
